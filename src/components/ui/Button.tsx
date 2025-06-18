@@ -12,11 +12,11 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'px-4 py-2 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2'
+    'px-4 py-2 rounded-md font-regular focus:outline-none focus:ring-2 focus:ring-offset-2'
 
   const variants = {
     primary:
-      'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+      'bg-zinc-950 dark:bg-light text-white hover:bg-zinc-800 focus:ring-zinc-500',
     secondary:
       'bg-gray-300 text-gray-800 hover:bg-gray-400 focus:ring-gray-400',
     danger:

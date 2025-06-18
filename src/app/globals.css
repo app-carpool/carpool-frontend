@@ -35,3 +35,7 @@ body {
 .font-inter {
   font-family: var(--font-inter);
 }
+
+.bg-light{
+  background-color: #F3F4F6;
+}

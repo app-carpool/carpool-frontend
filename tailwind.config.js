@@ -12,6 +12,10 @@ module.exports = {
         outfit: ['var(--font-outfit)'],
         inter: ['var(--font-inter)'],
       },
+      colors: {
+        primary: '#A0ABC0',
+        secondary: '#3B22A6',
+      },
     },
   },
 }

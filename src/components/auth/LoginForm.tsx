@@ -16,7 +16,7 @@ export function LoginForm({onSubmit}:{ onSubmit: (data: LoginFormData)=>void}) {
 
     return(
         <form onSubmit={handleSubmit}>
-
+            
         </form>
     )
 }

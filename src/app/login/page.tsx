@@ -1,8 +1,11 @@
 
 export default function LoginPage() {
-    return(
-        <div>
-            
-        </div>
-    )
+  
+
+  return (
+    <div className="">
+      
+    </div>
+
+  )
 }

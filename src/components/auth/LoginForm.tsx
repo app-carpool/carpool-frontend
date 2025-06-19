@@ -4,6 +4,8 @@ import { useState } from "react"
 import type { LoginFormData } from '@/types/forms'
 import { loginUser } from "@/services/authService"
 import { Button } from "../ui/Button"
+import { Input } from "../ui/Input"
+import { FcGoogle } from "react-icons/fc"
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -25,51 +27,62 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 p-6 w-full">
-      <div className="flex flex-col items-center">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6 w-full">
+      <div className="flex flex-col items-center mb-2">
         <h1 className="font-outfit text-lg font-semibold">Inicia sesión en tu cuenta</h1>
         <p className="font-inter font-regular text-sm">Ingresa email y contraseña para iniciar sesión</p>
       </div>
       <div className="flex flex-col">
-        <label htmlFor="email" className="text-sm font-regular font-inter text-gray-700 dark:text-white mb-1">
-          Correo electrónico
-        </label>
-        <input
-          id="email"
+         <Input
+          label="Correo electrónico"
           type="email"
           autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="px-4 py-2 rounded-md border font-inter border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white text-base"
         />
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="password" className="text-sm font-inter font-regular text-gray-700 dark:text-gray-200 mb-1">
-          Contraseña
-        </label>
-        <input
-          id="password"
+        <Input
+          label="Contraseña"
           type="password"
-          autoComplete="current-password"
+          autoComplete="password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="px-4 py-2 rounded-md font-inter border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white text-base"
         />
       </div>
 
+      
       <Button
         variant="primary"
         type="submit"
         disabled={loading}
-        className={`mt-2 py-2 rounded-md text-white ${
-          loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-        }`}
+        className="w-full mb-2"
       >
-        {loading ? 'Cargando...' : 'Iniciar sesión'}
+      {loading ? 'Cargando...' : 'Iniciar sesión'}
       </Button>
+
+      <div className="flex items-center gap-2 text-gray-500 ">
+        <div className="flex-1 h-px bg-gray-4/50" />
+        <span className="text-sm font-inter">o</span>
+        <div className="flex-1 h-px bg-gray-4/50" />
+      </div>
+
+      <Button variant="google" className="flex items-center gap-2 justify-center font-inter">
+        <span className="text-xl"><FcGoogle/></span>
+        Continuar con Google
+      </Button>
+
+      <p className="w-full text-center text-sm text-gray-500 font-inter">
+        Al hacer clic en continuar, aceptás nuestros
+        <a href="/terms" className="mx-1 text-dark-2 font-medium">Términos de Servicio</a>
+        y
+        <a href="/privacy" className="text-dark-2 font-medium ml-1">Política de Privacidad</a>.
+      </p>
+
+
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </form>
   )

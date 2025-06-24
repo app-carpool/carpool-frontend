@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "next-themes";
 
 import localFont from 'next/font/local'
+import Head from "next/head";
 
 export const outfit = localFont({
   src: [
@@ -41,6 +42,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${outfit.variable} ${inter.variable}`} suppressHydrationWarning>
+      <head>
+        <meta charSet="UTF-8" />
+      </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}

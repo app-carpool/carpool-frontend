@@ -6,19 +6,22 @@ import { loginUser } from "@/services/authService"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
 import { FcGoogle } from "react-icons/fc"
+import { useNavigate } from "react-router-dom"
 
 export function LoginForm() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
     try {
-      await loginUser({ email, password })  // Llamás al servicio que ya tenés
+      await loginUser({ username, password })  // Llamás al servicio que ya tenés
+      navigate('/home')
     } catch (err) {
       setError('Error al iniciar sesión') // o err.message si tu servicio lo provee
     } finally {
@@ -34,12 +37,12 @@ export function LoginForm() {
       </div>
       <div className="flex flex-col">
          <Input
-          label="Correo electrónico"
-          type="email"
-          autoComplete="email"
+          label="Nombre de usuario"
+          type="username"
+          autoComplete="username"
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
       </div>
 

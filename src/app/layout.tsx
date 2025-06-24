@@ -1,16 +1,34 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "next-themes";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+import localFont from 'next/font/local'
+import Head from "next/head";
+
+export const outfit = localFont({
+  src: [
+    { path: '../fonts/outfit/Outfit-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/outfit/Outfit-Medium.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/outfit/Outfit-SemiBold.woff2', weight: '600', style: 'normal' },
+    { path: '../fonts/outfit/Outfit-Bold.woff2', weight: '700', style: 'normal' },
+  ],
+  variable: '--font-outfit',
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+export const inter = localFont({
+  src: [
+    { path: '../fonts/inter/Inter-Light.woff2', weight: '300', style: 'normal' },
+    { path: '../fonts/inter/Inter-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/inter/Inter-Medium.woff2', weight: '500', style: 'normal' },
+  ],
+  variable: '--font-inter',
+  display: 'swap',
 });
+
+
+
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,11 +41,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="es" className={`${outfit.variable} ${inter.variable}`} suppressHydrationWarning>
+      <head>
+        <meta charSet="UTF-8" />
+      </head>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

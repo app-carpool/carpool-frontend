@@ -7,13 +7,14 @@ import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
 import { FcGoogle } from "react-icons/fc"
 import { useNavigate } from "react-router-dom"
+import { useRouter } from "next/navigation"
 
 export function LoginForm() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,7 +22,7 @@ export function LoginForm() {
     setError(null)
     try {
       await loginUser({ username, password })  // Llamás al servicio que ya tenés
-      navigate('/home')
+      router.push('/home')
     } catch (err) {
       setError('Error al iniciar sesión') // o err.message si tu servicio lo provee
     } finally {
@@ -31,7 +32,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6 w-full">
-      <div className="flex flex-col items-center mb-2">
+      <div className="flex flex-col items-center text-center mb-2">
         <h1 className="font-outfit text-lg font-semibold">Inicia sesión en tu cuenta</h1>
         <p className="font-inter font-regular text-sm">Ingresa email y contraseña para iniciar sesión</p>
       </div>

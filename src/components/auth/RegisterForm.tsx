@@ -11,11 +11,10 @@ import { useRouter } from "next/navigation"
 import { 
   registerStep1Schema, 
   registerStep2Schema, 
-  completeRegisterSchema,
   type RegisterStep1Data,
   type RegisterStep2Data,
   type CompleteRegisterData
-} from "@/schemas/registerSchema"
+} from "@/schemas/auth/registerSchema"
 
 export function RegisterForm() {
   const [step, setStep] = useState(1)

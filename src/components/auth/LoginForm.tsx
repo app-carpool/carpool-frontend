@@ -1,49 +1,59 @@
 'use client'
 
 import { useState } from "react"
-import type { LoginFormData } from '@/types/forms'
 import { loginUser } from "@/services/authService"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
 import { FcGoogle } from "react-icons/fc"
-import { useNavigate } from "react-router-dom"
 import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { LoginData, loginSchema } from "@/schemas/auth/loginSchema"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 export function LoginForm() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter();
+  const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: '',
+      password: ''
+    }
+  })
+
+  const onSubmit = async (data: LoginData) => {
     setLoading(true)
     setError(null)
     try {
-      await loginUser({ username, password })  // Llamás al servicio que ya tenés
+      await loginUser(data)
       router.push('/home')
     } catch (err) {
-      setError('Error al iniciar sesión') // o err.message si tu servicio lo provee
+      setError('Error al iniciar sesión')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6 w-full">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 p-6 w-full">
       <div className="flex flex-col items-center text-center mb-2">
         <h1 className="font-outfit text-lg font-semibold">Inicia sesión en tu cuenta</h1>
         <p className="font-inter font-regular text-sm">Ingresa email y contraseña para iniciar sesión</p>
       </div>
+
       <div className="flex flex-col">
-         <Input
+        <Input
           label="Nombre de usuario"
-          type="username"
+          type="text"
           autoComplete="username"
-          required
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          {...register('username')}
+          error={errors.username?.message}
         />
       </div>
 
@@ -51,21 +61,19 @@ export function LoginForm() {
         <Input
           label="Contraseña"
           type="password"
-          autoComplete="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+          {...register('password')}
+          error={errors.password?.message}
         />
       </div>
 
-      
       <Button
         variant="primary"
         type="submit"
         disabled={loading}
         className="w-full mb-2"
       >
-      {loading ? 'Cargando...' : 'Iniciar sesión'}
+        {loading ? 'Cargando...' : 'Iniciar sesión'}
       </Button>
 
       <div className="flex items-center gap-2 text-gray-500 ">
@@ -85,7 +93,6 @@ export function LoginForm() {
         y
         <a href="/privacy" className="text-dark-2 font-medium ml-1">Política de Privacidad</a>.
       </p>
-
 
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </form>

@@ -1,10 +1,7 @@
-import { LoginFormData } from "@/types/forms";
+import { LoginFormData, RegisterFormData } from "@/types/forms";
+import { LoginResponse, RegisterResponse } from "@/types/response/auth";
 import { User } from "@/types/user";
 
-interface LoginResponse {
-  token: string;
-  user: User;
-}
 
 
 export async function loginUser(data: LoginFormData): Promise<{
@@ -30,4 +27,28 @@ export async function loginUser(data: LoginFormData): Promise<{
         return {success: false, message: err.message}
     }
     
+}
+
+export async function registerUser(data: RegisterFormData): Promise<{
+    success:boolean;
+    data?:RegisterResponse;
+    message?: string}
+> {
+    try {
+        const res = await fetch('/api/register',{
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data),
+        })
+
+        if (!res.ok){
+            throw new Error('Datos inválidos')
+        }
+
+        const response: RegisterResponse = await res.json();
+
+        return {success: true, data: response}
+    } catch (err: any) {
+        return {success: false, message: err.message}
+    }
 }

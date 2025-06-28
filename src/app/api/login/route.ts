@@ -12,18 +12,41 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
+    const responseData = await response.json();
 
-    return new Response(JSON.stringify(data), {
-      status: response.status,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error: any) {
-    // Si es un error antes de recibir la respuesta del backend
+    if (!response.ok) {
+      // Si hubo error, lo devolvés directamente
+      return new Response(JSON.stringify(responseData), {
+        status: response.status,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // token está en responseData.data
+    const token = responseData.data;
+
+    // Armás la cookie con el token
+    const cookie = `token=${token}; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=Lax`;
+
     return new Response(
       JSON.stringify({
-        state: "ERROR",
-        messages: ["Error en la API de login", error.message],
+        status: responseData.status,
+        message: responseData.message,
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Set-Cookie": cookie,
+        },
+      }
+    );
+  } catch (error: any) {
+    return new Response(
+      JSON.stringify({
+        status: 500,
+        message: "Error en la API de login",
+        error: error.message,
       }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );

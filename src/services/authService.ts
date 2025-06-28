@@ -1,8 +1,5 @@
 import { LoginFormData, RegisterFormData } from "@/types/forms";
 import { LoginResponse, RegisterResponse } from "@/types/response/auth";
-import { User } from "@/types/user";
-
-
 
 export async function loginUser(data: LoginFormData): Promise<{
     success: boolean; 
@@ -14,6 +11,7 @@ export async function loginUser(data: LoginFormData): Promise<{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data),
+            credentials: 'include',
         })
 
         if (!res.ok) {
@@ -51,4 +49,24 @@ export async function registerUser(data: RegisterFormData): Promise<{
     } catch (err: any) {
         return {success: false, message: err.message}
     }
+}
+
+export async function logoutUser(): Promise<{
+  success: boolean;
+  message?: string;
+}> {
+  try {
+    const res = await fetch('/api/logout', {
+      method: 'POST',
+      credentials: 'include', 
+    });
+
+    if (!res.ok) {
+      throw new Error('Error al cerrar sesión');
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, message: err.message };
+  }
 }

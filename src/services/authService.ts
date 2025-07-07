@@ -11,7 +11,6 @@ export async function loginUser(data: LoginFormData): Promise<{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data),
-            credentials: 'include',
         })
 
         if (!res.ok) {
@@ -58,7 +57,6 @@ export async function logoutUser(): Promise<{
   try {
     const res = await fetch('/api/logout', {
       method: 'POST',
-      credentials: 'include', 
     });
 
     if (!res.ok) {

@@ -22,25 +22,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // token está en responseData.data
-    const token = responseData.data;
-
-    // Armás la cookie con el token
-    const cookie = `token=${token}; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=Lax`;
-
-    return new Response(
-      JSON.stringify({
-        status: responseData.status,
-        message: responseData.message,
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Set-Cookie": cookie,
-        },
-      }
-    );
+    return new Response(JSON.stringify(responseData), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   } catch (error: any) {
     return new Response(
       JSON.stringify({

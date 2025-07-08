@@ -8,12 +8,13 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { LoginData, loginSchema } from "@/schemas/auth/loginSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useAuth } from "@/contexts/authContext" // 👈 importá el contexto
+import { useAuth } from "@/contexts/authContext" 
+import Spinner from "../ui/Spinner"
 
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const { login, loading } = useAuth() // 👈 obtené login y loading desde el contexto
+  const { login, loading } = useAuth() 
 
   const {
     register,
@@ -70,7 +71,11 @@ export function LoginForm() {
         disabled={loading}
         className="w-full mb-2"
       >
-        {loading ? 'Cargando...' : 'Iniciar sesión'}
+        {loading ? (
+          <Spinner size={20} />
+        ) : (
+          'Iniciar sesión'
+        )}
       </Button>
 
       <div className="flex items-center gap-2 text-gray-500 ">

@@ -1,32 +1,28 @@
 import { LoginFormData, RegisterFormData } from "@/types/forms";
 import { LoginResponse, RegisterResponse } from "@/types/response/auth";
 
-export async function loginUser(data: LoginFormData): Promise<{
-  success: boolean;
-  message?: string;
-}> {
+// src/services/authService.ts
+export const loginUser = async (data: LoginFormData) => {
   try {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-      credentials: 'include', // Importante para mandar la cookie
+      credentials: 'include',
     });
-
-    const response = await res.json();
-
-    if (!res.ok || !response.success) {
-      return {
-        success: false,
-        message: response.message || 'Credenciales inválidas',
-      };
+    
+    const result = await res.json();
+    
+    if (res.ok && result.success) {
+      return { success: true, ...result };
+    } else {
+      return { success: false, error: result.message || 'Login failed' };
     }
-
-    return { success: true };
-  } catch (err: any) {
-    return { success: false, message: err.message };
+  } catch (error) {
+    console.error('💥 Error in loginUser:', error);
+    return { success: false, error: 'Network error' };
   }
-}
+};
 
 
 export async function registerUser(data: RegisterFormData): Promise<{

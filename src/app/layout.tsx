@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import localFont from 'next/font/local'
 import { AppProviders } from './providers';
+import MobileNavbar from "@/components/navbar/MobileNavbar";
+import ClientLayout from "@/layout/ClientLayout";
 
 
 export const outfit = localFont({
@@ -45,7 +47,9 @@ export default function RootLayout({
       </head>
       <body>
         <AppProviders>
-          {children}
+          <ClientLayout>
+            {children}
+          </ClientLayout>
         </AppProviders>
       </body>
     </html>

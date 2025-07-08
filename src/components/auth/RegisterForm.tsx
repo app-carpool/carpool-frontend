@@ -15,6 +15,7 @@ import {
   type RegisterStep2Data,
   type CompleteRegisterData
 } from "@/schemas/auth/registerSchema"
+import Spinner from "../ui/Spinner"
 
 export function RegisterForm() {
   const [step, setStep] = useState(1)
@@ -212,7 +213,11 @@ export function RegisterForm() {
               className="w-full" 
               disabled={loading || step2Form.formState.isSubmitting}
             >
-              {loading ? 'Registrando...' : 'Registrarse'}
+              {loading ? (
+                <Spinner size={20} />
+              ) : (
+                'Registrarse'
+              )}
             </Button>
           </div>
         </form>

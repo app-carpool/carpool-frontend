@@ -34,7 +34,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (res.ok && json.user) {
           setUser({
             username: json.user.username,
-            role: json.user.role,
           });
         } else {
           setUser(null);
@@ -51,49 +50,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
 
-
-
   const login = async (data: LoginFormData) => {
     setLoading(true);
-    const result = await loginUser(data);
-    console.log('result', result);
-
-    if (result.success) {
-      //Pedimos el usuario desde la cookie vía /api/me
-      try {
-        const res = await fetch('/api/me', {
-          method: 'GET',
-          credentials: 'include',
-        });
-
-        const json = await res.json();
-
-        if (res.ok && json.user) {
-          setUser({
-            username: json.user.username,
-            role: json.user.role,
+    
+    try {
+      const result = await loginUser(data);
+      if (result.success) {
+        try {
+          const res = await fetch('/api/me', {
+            method: 'GET',
+            credentials: 'include',
           });
-        } else {
+          if (res.ok) {
+            const json = await res.json();
+            if (json.user) {
+              setUser({
+                username: json.user.username,
+              });
+      
+            } else {
+      
+              setUser(null);
+            }
+          } else {
+            const errorText = await res.text();
+            console.error('Error response:', errorText);
+            setUser(null);
+          }
+        } catch (err) {
+          console.error('Error fetching /api/me:', err);
           setUser(null);
         }
-      } catch (err) {
-        console.error('Error al obtener el usuario desde /api/me', err);
+      } else {
         setUser(null);
       }
-    } else {
+    } catch (error) {
+      console.error('Login error:', error);
       setUser(null);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
 
   // Logout: limpiar token y user
   const logout = async () => {
-    await logoutUser(); // Borra la cookie
-    setUser(null);      // Limpia el estado local
+    setLoading(true);
+    await logoutUser();
+    setUser(null);
+    
+    // Mostrar spinner al menos 300ms antes de redirigir
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     router.push('/login');
   };
+
+
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>

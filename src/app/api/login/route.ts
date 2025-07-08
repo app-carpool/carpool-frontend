@@ -1,3 +1,4 @@
+// src/app/api/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { LoginResponse } from "@/types/response/auth";
 import { parseJwt } from "@/utils/jwt";
@@ -16,8 +17,7 @@ export async function POST(req: NextRequest) {
 
     const data: LoginResponse = await res.json();
 
-    // Si el backend respondió con error (por status)
-    if (!res.ok || data.state !== 'success') {
+    if (!res.ok || data.state !== 'OK') {
       return NextResponse.json(
         {
           success: false,
@@ -26,24 +26,34 @@ export async function POST(req: NextRequest) {
         { status: res.status }
       );
     }
-
+    
     const token = data.data;
     const decoded = parseJwt(token);
-    const maxAge = decoded.exp - decoded.iat;
 
-    // Guardamos el token como cookie HttpOnly
-    const response = NextResponse.json({ success: true });
+    const iat = Number(decoded.iat);
+    const exp = Number(decoded.exp);
+    const maxAge = exp > iat ? exp - iat : 60 * 60 * 2;
 
+    const response = NextResponse.json({
+      success: true,
+      user: {
+        username: decoded.username,
+      }
+    });
+
+    // Cambiar sameSite a 'lax' para mejor compatibilidad
     response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', // Cambiar de 'strict' a 'lax'
       path: '/',
-      maxAge: maxAge, 
+      maxAge,
     });
 
     return response;
+
   } catch (error: any) {
+    console.error('Login error:', error);
     return NextResponse.json(
       {
         success: false,

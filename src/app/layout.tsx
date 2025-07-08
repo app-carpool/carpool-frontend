@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 
 import localFont from 'next/font/local'
 import Head from "next/head";
+import { AuthProvider } from "@/contexts/authContext";
 
 export const outfit = localFont({
   src: [
@@ -47,7 +48,9 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

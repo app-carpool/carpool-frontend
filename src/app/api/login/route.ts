@@ -12,18 +12,28 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
+    const responseData = await response.json();
 
-    return new Response(JSON.stringify(data), {
-      status: response.status,
-      headers: { "Content-Type": "application/json" },
+    if (!response.ok) {
+      // Si hubo error, lo devolvés directamente
+      return new Response(JSON.stringify(responseData), {
+        status: response.status,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify(responseData), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   } catch (error: any) {
-    // Si es un error antes de recibir la respuesta del backend
     return new Response(
       JSON.stringify({
-        state: "ERROR",
-        messages: ["Error en la API de login", error.message],
+        status: 500,
+        message: "Error en la API de login",
+        error: error.message,
       }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );

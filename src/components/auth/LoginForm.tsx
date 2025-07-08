@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from "react"
-import { loginUser } from "@/services/authService"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
 import { FcGoogle } from "react-icons/fc"
@@ -9,11 +8,12 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { LoginData, loginSchema } from "@/schemas/auth/loginSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useAuth } from "@/contexts/authContext" // 👈 importá el contexto
 
 export function LoginForm() {
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { login, loading } = useAuth() // 👈 obtené login y loading desde el contexto
 
   const {
     register,
@@ -28,15 +28,12 @@ export function LoginForm() {
   })
 
   const onSubmit = async (data: LoginData) => {
-    setLoading(true)
     setError(null)
     try {
-      await loginUser(data)
-      router.push('/home')
+      await login(data)
+      router.push('/home') // 👈 redireccioná después del login
     } catch (err) {
       setError('Error al iniciar sesión')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -83,7 +80,7 @@ export function LoginForm() {
       </div>
 
       <Button variant="google" className="flex items-center gap-2 justify-center font-inter">
-        <span className="text-xl"><FcGoogle/></span>
+        <span className="text-xl"><FcGoogle /></span>
         Continuar con Google
       </Button>
 

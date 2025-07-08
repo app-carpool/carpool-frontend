@@ -2,6 +2,7 @@
 import { useAuth } from '@/contexts/authContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import MobileNavbar from './navbar/MobileNavbar'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -51,5 +52,13 @@ export function ProtectedRoute({
     return null
   }
 
-  return <>{children}</>
+  return (
+    <>
+      <div className="block md:hidden">
+        <MobileNavbar />
+      </div>
+      <main className="flex-1">{children}</main>
+    </>
+  )
+
 }

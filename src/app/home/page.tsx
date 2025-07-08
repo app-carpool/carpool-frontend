@@ -21,7 +21,7 @@ export default function HomePage() {
           <h1 className="text-3xl font-bold mb-4">Bienvenido a la Home</h1>
             {user && (
               <p className="text-lg">
-                Hola, <strong>{user.username}</strong>! Tu rol es: <em>{user.role}</em>.
+                Hola, <strong>{user.username}</strong>!
               </p>
             )}
         </div>

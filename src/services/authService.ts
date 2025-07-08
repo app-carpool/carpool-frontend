@@ -2,29 +2,32 @@ import { LoginFormData, RegisterFormData } from "@/types/forms";
 import { LoginResponse, RegisterResponse } from "@/types/response/auth";
 
 export async function loginUser(data: LoginFormData): Promise<{
-    success: boolean; 
-    data?:LoginResponse; 
-    message?: string}
-> {
-    try {
-        const res = await fetch('/api/login',{
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data),
-        })
+  success: boolean;
+  message?: string;
+}> {
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      credentials: 'include', // Importante para mandar la cookie
+    });
 
-        if (!res.ok) {
-            throw new Error('Credenciales inválidas')
-        }
+    const response = await res.json();
 
-        const response: LoginResponse = await res.json();
-
-        return {success: true, data: response}
-    } catch (err: any) {
-        return {success: false, message: err.message}
+    if (!res.ok || !response.success) {
+      return {
+        success: false,
+        message: response.message || 'Credenciales inválidas',
+      };
     }
-    
+
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, message: err.message };
+  }
 }
+
 
 export async function registerUser(data: RegisterFormData): Promise<{
     success:boolean;
@@ -57,6 +60,7 @@ export async function logoutUser(): Promise<{
   try {
     const res = await fetch('/api/logout', {
       method: 'POST',
+      credentials: 'include',
     });
 
     if (!res.ok) {
@@ -68,3 +72,4 @@ export async function logoutUser(): Promise<{
     return { success: false, message: err.message };
   }
 }
+

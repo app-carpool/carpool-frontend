@@ -1,32 +1,31 @@
 import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { NextRequest, NextResponse } from 'next/server';
+import { parseJwt } from "@/utils/jwt"; // Tu helper para decodificar el token
 
-export async function GET() {
-  const cookieStore = await cookies(); 
-  const token = cookieStore.get('token')?.value;
+export async function GET(req: NextRequest) {
+  const token = req.cookies.get("token")?.value;
 
   if (!token) {
-    return NextResponse.json({ message: 'No autenticado' }, { status: 401 });
-  }
-
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    return NextResponse.json({ message: 'No hay JWT_SECRET' }, { status: 500 });
+    return NextResponse.json({ user: null }, { status: 401 });
   }
 
   try {
-    const decoded = jwt.verify(token, secret) as {
-      username: string;
-      role: string;
-      exp: number;
-    };
+    const decoded = parseJwt(token);
 
-    return NextResponse.json({
+    if (!decoded || !decoded.username || !decoded.role) {
+      return NextResponse.json({ user: null }, { status: 401 });
+    }
+
+    const user = {
       username: decoded.username,
       role: decoded.role,
-    });
-  } catch (err) {
-    return NextResponse.json({ message: 'Token inválido' }, { status: 401 });
+    };
+
+    return NextResponse.json({ user });
+  } catch (error) {
+    return NextResponse.json(
+      { user: null, message: "Token inválido" },
+      { status: 400 }
+    );
   }
 }

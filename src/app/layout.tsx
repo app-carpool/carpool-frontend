@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
-
 import localFont from 'next/font/local'
-import Head from "next/head";
-import { AuthProvider } from "@/contexts/authContext";
+import { AppProviders } from './providers';
+
 
 export const outfit = localFont({
   src: [
@@ -47,11 +44,9 @@ export default function RootLayout({
         <meta charSet="UTF-8" />
       </head>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </ThemeProvider>
+        <AppProviders>
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

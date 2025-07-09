@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isValidJWT } from "./utils/jwt";
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -12,15 +13,13 @@ export function middleware(req: NextRequest) {
 
   const token = req.cookies.get('token')?.value;
 
-  if (!token) {
+  if (!token || !isValidJWT(token)) {
     if (pathname.startsWith('/api')) {
-      // Para API responder 401 en vez de redirect
       return new NextResponse(JSON.stringify({ message: 'No autorizado' }), {
         status: 401,
         headers: { 'content-type': 'application/json' },
       });
     } else {
-      // Para rutas web redirigir a login
       const url = req.nextUrl.clone();
       url.pathname = '/login';
       return NextResponse.redirect(url);

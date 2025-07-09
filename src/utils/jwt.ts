@@ -20,3 +20,19 @@ export function parseJwt(token: string): any | null {
     return null;
   }
 }
+
+
+export function isValidJWT(token: string): boolean {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    const now = Math.floor(Date.now() / 1000);
+    
+    // Verificar que tenga expiración y no haya expirado
+    return payload.exp && payload.exp > now;
+  } catch {
+    return false;
+  }
+}

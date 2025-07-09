@@ -1,15 +1,25 @@
-export async function POST() {
-  // Cookie con Max-Age=0 para borrarla
-  const expiredCookie = `token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
+import { NextResponse } from 'next/server'
 
-  return new Response(
-    JSON.stringify({ message: "Logout exitoso" }),
-    {
-      status: 200,
-      headers: {
-        "Set-Cookie": expiredCookie,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+export async function POST() {
+  const response = NextResponse.json({ message: "Logout exitoso" });
+
+  // Borrar access token
+  response.cookies.set('token', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 0,
+  });
+
+  // Borrar refresh token
+  response.cookies.set('refreshToken', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 0,
+  });
+
+  return response;
 }

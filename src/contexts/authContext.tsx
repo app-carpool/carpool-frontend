@@ -3,6 +3,7 @@
 import { loginUser, logoutUser } from '@/services/authService';
 import { LoginFormData } from '@/types/forms';
 import { User } from '@/types/user';
+import { fetchWithRefresh } from '@/utils/fetchWithRefresh';
 import { parseJwt } from '@/utils/jwt';
 import { useRouter } from 'next/navigation';
 import React, { createContext, useContext, useState, useEffect } from 'react';
@@ -24,10 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch('/api/me', {
-          method: 'GET',
-          credentials: 'include',
-        });
+        const res = await fetchWithRefresh('/api/me');
 
         const json = await res.json();
 
@@ -57,10 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const result = await loginUser(data);
       if (result.success) {
         try {
-          const res = await fetch('/api/me', {
-            method: 'GET',
-            credentials: 'include',
-          });
+          const res = await fetchWithRefresh('/api/me');
           if (res.ok) {
             const json = await res.json();
             if (json.user) {

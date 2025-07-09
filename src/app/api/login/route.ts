@@ -1,4 +1,7 @@
-import { NextRequest } from "next/server";
+// src/app/api/login/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { LoginResponse } from "@/types/response/auth";
+import { parseJwt } from "@/utils/jwt";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -6,36 +9,58 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const response = await fetch(`${apiUrl}/login`, {
+    const res = await fetch(`${apiUrl}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 
-    const responseData = await response.json();
+    const data: LoginResponse = await res.json();
 
-    if (!response.ok) {
-      // Si hubo error, lo devolvés directamente
-      return new Response(JSON.stringify(responseData), {
-        status: response.status,
-        headers: { "Content-Type": "application/json" },
-      });
+    if (!res.ok || data.state !== 'OK') {
+      return NextResponse.json(
+        {
+          success: false,
+          message: data.messages?.[0] || 'Error en login',
+        },
+        { status: res.status }
+      );
     }
+    
+    const token = data.data;
+    const decoded = parseJwt(token);
 
-    return new Response(JSON.stringify(responseData), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const iat = Number(decoded.iat);
+    const exp = Number(decoded.exp);
+    const maxAge = exp > iat ? exp - iat : 60 * 60 * 2;
+
+    const response = NextResponse.json({
+      success: true,
+      user: {
+        username: decoded.username,
+      }
     });
+
+    // Cambiar sameSite a 'lax' para mejor compatibilidad
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', // Cambiar de 'strict' a 'lax'
+      path: '/',
+      maxAge,
+    });
+
+    return response;
+
   } catch (error: any) {
-    return new Response(
-      JSON.stringify({
-        status: 500,
+    console.error('Login error:', error);
+    return NextResponse.json(
+      {
+        success: false,
         message: "Error en la API de login",
         error: error.message,
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      },
+      { status: 500 }
     );
   }
 }

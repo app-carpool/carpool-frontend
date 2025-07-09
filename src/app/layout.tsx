@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
-
 import localFont from 'next/font/local'
-import Head from "next/head";
-import { AuthProvider } from "@/contexts/authContext";
+import { AppProviders } from './providers';
+import MobileNavbar from "@/components/navbar/MobileNavbar";
+import ClientLayout from "@/layout/ClientLayout";
+
 
 export const outfit = localFont({
   src: [
@@ -47,11 +46,11 @@ export default function RootLayout({
         <meta charSet="UTF-8" />
       </head>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AuthProvider>
+        <AppProviders>
+          <ClientLayout>
             {children}
-          </AuthProvider>
-        </ThemeProvider>
+          </ClientLayout>
+        </AppProviders>
       </body>
     </html>
   );

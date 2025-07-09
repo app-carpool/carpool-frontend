@@ -1,30 +1,29 @@
 import { LoginFormData, RegisterFormData } from "@/types/forms";
 import { LoginResponse, RegisterResponse } from "@/types/response/auth";
 
-export async function loginUser(data: LoginFormData): Promise<{
-    success: boolean; 
-    data?:LoginResponse; 
-    message?: string}
-> {
-    try {
-        const res = await fetch('/api/login',{
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data),
-        })
-
-        if (!res.ok) {
-            throw new Error('Credenciales inválidas')
-        }
-
-        const response: LoginResponse = await res.json();
-
-        return {success: true, data: response}
-    } catch (err: any) {
-        return {success: false, message: err.message}
-    }
+// src/services/authService.ts
+export const loginUser = async (data: LoginFormData) => {
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
     
-}
+    const result = await res.json();
+    
+    if (res.ok && result.success) {
+      return { success: true, ...result };
+    } else {
+      return { success: false, error: result.message || 'Login failed' };
+    }
+  } catch (error) {
+    console.error('💥 Error in loginUser:', error);
+    return { success: false, error: 'Network error' };
+  }
+};
+
 
 export async function registerUser(data: RegisterFormData): Promise<{
     success:boolean;
@@ -57,6 +56,7 @@ export async function logoutUser(): Promise<{
   try {
     const res = await fetch('/api/logout', {
       method: 'POST',
+      credentials: 'include',
     });
 
     if (!res.ok) {
@@ -68,3 +68,4 @@ export async function logoutUser(): Promise<{
     return { success: false, message: err.message };
   }
 }
+

@@ -21,6 +21,16 @@ export function parseJwt(token: string): any | null {
   }
 }
 
+export function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp < now;
+  } catch (error) {
+    console.error('Error parsing token:', error);
+    return true; // Si no se puede parsear, considerarlo expirado
+  }
+}
 
 export function isValidJWT(token: string): boolean {
   try {

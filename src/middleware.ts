@@ -33,9 +33,8 @@ export async function middleware(req: NextRequest) {
   // Token expirado
   if (isTokenExpired(token)) {
     const refreshToken = req.cookies.get('refreshToken')?.value;
-    
+
     if (!refreshToken) {
-      // No hay refresh token, redirigir al login
       if (pathname.startsWith('/api')) {
         return new NextResponse(
           JSON.stringify({ message: 'Token expirado' }),
@@ -64,11 +63,10 @@ export async function middleware(req: NextRequest) {
       if (response.ok) {
         const data = await response.json();
         const newAccessToken = data.data?.accessToken;
-        
+
         if (newAccessToken) {
-          // Crear respuesta con nuevo token
           const res = NextResponse.next();
-          
+
           const decoded = JSON.parse(
             Buffer.from(newAccessToken.split('.')[1], 'base64').toString()
           );
@@ -82,6 +80,16 @@ export async function middleware(req: NextRequest) {
             maxAge,
           });
 
+          // También actualizamos tokenValidUntil porque tenemos nuevo token válido
+          const nextCheck = Date.now() + 5 * 60 * 1000; // 5 minutos en ms
+          res.cookies.set('tokenValidUntil', nextCheck.toString(), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/',
+            maxAge: 300, // 5 minutos en segundos
+          });
+
           return res;
         }
       }
@@ -89,7 +97,6 @@ export async function middleware(req: NextRequest) {
       console.error('Error refreshing token in middleware:', error);
     }
 
-    // Si falla el refresh
     if (pathname.startsWith('/api')) {
       return new NextResponse(
         JSON.stringify({ message: 'Token expirado' }),
@@ -105,7 +112,62 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // Verificamos si ya validamos recientemente el token
+  const tokenValidUntilStr = req.cookies.get('tokenValidUntil')?.value;
+  const now = Date.now();
+
+  if (tokenValidUntilStr && Number(tokenValidUntilStr) > now) {
+    console.log('Middleware: Validación cacheada, token ya validado recientemente ✅');
+    return NextResponse.next();
+  }
+
+  // Si no está cacheado o expiró, hacemos la validación
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const verifyResponse = await fetch(`${apiUrl}/auth/verify-token`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (verifyResponse.ok) {
+      const data = await verifyResponse.json();
+
+      if (data.state === 'OK') {
+        console.log('Middleware: Token válido ✅');
+
+        const res = NextResponse.next();
+
+        // Guardamos la cookie para cachear la validación 5 minutos
+        const nextCheck = now + 5 * 60 * 1000; // 5 minutos
+        res.cookies.set('tokenValidUntil', nextCheck.toString(), {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          path: '/',
+          maxAge: 300, // 5 minutos en segundos
+        });
+
+        return res;
+      } else {
+        console.log('Middleware: Token inválido', data.messages);
+        const url = req.nextUrl.clone();
+        url.pathname = '/login';
+        return NextResponse.redirect(url);
+      }
+    } else {
+      console.log('Middleware: Respuesta no OK del backend', verifyResponse.status);
+      const url = req.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+  } catch (error) {
+    console.error('Error verificando firma del token:', error);
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
 }
 
 export const config = {

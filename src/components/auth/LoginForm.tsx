@@ -72,7 +72,8 @@ export function LoginForm() {
         className="w-full mb-2"
       >
         {loading ? (
-          <Spinner size={20} />
+          <span className="flex items-center justify-center"><Spinner size={20} /></span>
+          
         ) : (
           'Iniciar sesión'
         )}

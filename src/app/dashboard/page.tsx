@@ -7,7 +7,7 @@ import Link from 'next/link';
 import ProtectedPage from '@/components/ProtectedPage';
 
 
-export default function HomePage() {
+export default function DashboardPage() {
   const { user, logout, loading } = useAuth();
 
   if (loading) {
@@ -22,10 +22,10 @@ export default function HomePage() {
     <ProtectedPage>
       <main className="p-8 flex items-center justify-between">
         <div className='flex flex-col items-start'>
-          <h1 className="text-3xl font-bold">Bienvenido a la Home</h1>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
           <p>Hola, <strong>{user?.username}</strong>!</p>
         </div>
-        <Link href="/dashboard" className="text-white">Dashboard</Link>
+        <Link href="/home" className="text-white">Home</Link>
         <Button variant="outline" onClick={logout}>Logout</Button>
       </main>
     </ProtectedPage>

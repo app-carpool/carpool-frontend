@@ -3,8 +3,8 @@
 import { loginUser, logoutUser } from '@/services/authService';
 import { LoginFormData } from '@/types/forms';
 import { User } from '@/types/user';
-import { parseJwt } from '@/utils/jwt';
-import { useRouter } from 'next/navigation';
+import { fetchWithRefresh } from '@/lib/http/authInterceptor';
+import { useRouter, usePathname } from 'next/navigation';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface AuthContextType {
@@ -20,67 +20,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch('/api/me', {
-          method: 'GET',
-          credentials: 'include',
-        });
+  // Rutas públicas donde no necesitamos autenticación
+  const publicRoutes = ['/login', '/register'];
+  const isPublicRoute = publicRoutes.includes(pathname);
 
-        const json = await res.json();
+  // Función para obtener el usuario
+  const fetchUser = async () => {
+    try {
+      const res = await fetchWithRefresh('/api/me');
+      const json = await res.json();
 
-        if (res.ok && json.user) {
-          setUser({
-            username: json.user.username,
-          });
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
-        console.error('Error cargando usuario desde cookie:', err);
+      if (res.ok && json.user) {
+        setUser({ username: json.user.username });
+        return true;
+      } else {
         setUser(null);
-      } finally {
-        setLoading(false);
+        return false;
       }
+    } catch (err) {
+      console.error('Error cargando usuario:', err);
+      setUser(null);
+      return false;
+    }
+  };
+
+  // Inicializar usuario al cargar la app (solo si no es ruta pública)
+  useEffect(() => {
+    const initializeAuth = async () => {
+      setLoading(true);
+      
+      // Solo intentar obtener el usuario si no estamos en una ruta pública
+      if (!isPublicRoute) {
+        await fetchUser();
+      }
+      
+      setLoading(false);
     };
 
-    fetchUser();
-  }, []);
-
+    initializeAuth();
+  }, [isPublicRoute]);
 
   const login = async (data: LoginFormData) => {
     setLoading(true);
-    
     try {
       const result = await loginUser(data);
       if (result.success) {
-        try {
-          const res = await fetch('/api/me', {
-            method: 'GET',
-            credentials: 'include',
-          });
-          if (res.ok) {
-            const json = await res.json();
-            if (json.user) {
-              setUser({
-                username: json.user.username,
-              });
-      
-            } else {
-      
-              setUser(null);
-            }
-          } else {
-            const errorText = await res.text();
-            console.error('Error response:', errorText);
-            setUser(null);
-          }
-        } catch (err) {
-          console.error('Error fetching /api/me:', err);
-          setUser(null);
-        }
+        await fetchUser();
       } else {
         setUser(null);
       }
@@ -92,20 +79,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-
-  // Logout: limpiar token y user
   const logout = async () => {
     setLoading(true);
     await logoutUser();
     setUser(null);
-    
-    // Mostrar spinner al menos 300ms antes de redirigir
     await new Promise(resolve => setTimeout(resolve, 300));
-    
     router.push('/login');
   };
-
-
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>

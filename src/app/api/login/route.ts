@@ -27,8 +27,8 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    const token = data.data;
-    const decoded = parseJwt(token);
+    const { accessToken, refreshToken } = data.data;
+    const decoded: { username: string; iat: number; exp: number } = parseJwt(accessToken);
 
     const iat = Number(decoded.iat);
     const exp = Number(decoded.exp);
@@ -42,12 +42,20 @@ export async function POST(req: NextRequest) {
     });
 
     // Cambiar sameSite a 'lax' para mejor compatibilidad
-    response.cookies.set('token', token, {
+    response.cookies.set('token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Cambiar de 'strict' a 'lax'
+      sameSite: 'lax',
       path: '/',
       maxAge,
+    });
+
+    response.cookies.set('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 días
     });
 
     return response;

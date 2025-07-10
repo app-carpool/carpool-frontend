@@ -1,5 +1,8 @@
 export interface LoginResponse {
-  data: string; // JWT token
+  data: {
+    accessToken: string;
+    refreshToken: string;
+  };
   messages: string[];
   state: string;
 }

@@ -117,7 +117,7 @@ export async function middleware(req: NextRequest) {
   const now = Date.now();
 
   if (tokenValidUntilStr && Number(tokenValidUntilStr) > now) {
-    console.log('Middleware: Validación cacheada, token ya validado recientemente ✅');
+    console.log('Middleware: Validación cacheada, token ya validado recientemente');
     return NextResponse.next();
   }
 
@@ -135,7 +135,7 @@ export async function middleware(req: NextRequest) {
       const data = await verifyResponse.json();
 
       if (data.state === 'OK') {
-        console.log('Middleware: Token válido ✅');
+        console.log('Middleware: Token válido');
 
         const res = NextResponse.next();
 

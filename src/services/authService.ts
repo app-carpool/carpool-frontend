@@ -2,15 +2,25 @@ import { LoginFormData, RegisterFormData } from "@/types/forms";
 import { LoginResponse, RegisterResponse } from "@/types/response/auth";
 
 // src/services/authService.ts
-export const loginUser = async (data: LoginFormData) => {
+export const loginUser = async (data: LoginFormData & { recaptchaToken?: string }) => {
   try {
+    const { recaptchaToken, ...loginData } = data;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (recaptchaToken) {
+      headers['recaptcha'] = recaptchaToken;
+    }
+
     const res = await fetch('/api/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      headers,
+      body: JSON.stringify(loginData),
       credentials: 'include',
     });
-    
+
     const result = await res.json();
     
     if (res.ok && result.success) {

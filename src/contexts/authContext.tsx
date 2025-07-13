@@ -70,10 +70,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await fetchUser();
       } else {
         setUser(null);
+        throw new Error(result.error);
       }
     } catch (error) {
       console.error('Login error:', error);
       setUser(null);
+      throw error;
     } finally {
       setLoading(false);
     }

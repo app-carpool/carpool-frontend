@@ -16,12 +16,14 @@ import {
   type CompleteRegisterData
 } from "@/schemas/auth/registerSchema"
 import Spinner from "../ui/Spinner"
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export function RegisterForm() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { executeRecaptcha } = useGoogleReCaptcha()
 
   // Form para el paso 1
   const step1Form = useForm<RegisterStep1Data>({
@@ -64,7 +66,21 @@ export function RegisterForm() {
         ...data
       }
 
-      const response = await registerUser(completeData)
+      // Ejecutar reCAPTCHA
+      if (!executeRecaptcha) {
+        setError('reCAPTCHA no está disponible')
+        return
+      }
+
+      //Obtener el token de recaptcha, pasando el action signup, para saber que estamos haciendo
+      const gRecaptchaToken = await executeRecaptcha('signup')
+
+      if (!gRecaptchaToken) {
+        setError('Error al validar reCAPTCHA')
+        return
+      }
+
+      const response = await registerUser({...completeData, recaptchaToken: gRecaptchaToken})
       if (!response.success) {
         setError(response.message || "Error al registrar usuario")
         return

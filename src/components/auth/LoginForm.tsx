@@ -39,7 +39,7 @@ export function LoginForm() {
         return
       }
 
-      //Obntener el token de recaptcha, pasnado el action login, para sabe que estamos haciendo
+      //Obtener el token de recaptcha, pasando el action login, para saber que estamos haciendo
       const gRecaptchaToken = await executeRecaptcha('login')
       
       if (!gRecaptchaToken) {
@@ -47,10 +47,12 @@ export function LoginForm() {
         return
       }
       
+      //Crear un nuevo objeto con los datos del login y el captcha, para iniciar sesion
       await login({ ...data, recaptchaToken: gRecaptchaToken })
-      router.push('/home') // 👈 redireccioná después del login
+
+      router.push('/home') // redireccion después del login
     } catch (err) {
-      setError('Error al iniciar sesión')
+      setError(err.message || 'Error al iniciar sesión');
     }
   }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
 import { FcGoogle } from "react-icons/fc"
@@ -12,14 +12,15 @@ import { useAuth } from "@/contexts/authContext"
 import Spinner from "../ui/Spinner"
 
 export function LoginForm() {
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-  const { login, loading } = useAuth() 
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { login, loading } = useAuth() ;
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -29,12 +30,12 @@ export function LoginForm() {
   })
 
   const onSubmit = async (data: LoginData) => {
-    setError(null)
+    setError(null);
     try {
-      await login(data)
-      router.push('/home') // 👈 redireccioná después del login
+      await login(data);
+      router.push('/home'); //redirecciona después del login
     } catch (err) {
-      setError('Error al iniciar sesión')
+      setError('Error al iniciar sesión');
     }
   }
 

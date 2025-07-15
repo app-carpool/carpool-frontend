@@ -1,6 +1,6 @@
 'use client'
 
-import { loginUser, logoutUser } from '@/services/authService';
+import { loginUser, loginWithGoogle, logoutUser } from '@/services/authService';
 import { LoginFormData } from '@/types/forms';
 import { User } from '@/types/user';
 import { fetchWithRefresh } from '@/lib/http/authInterceptor';
@@ -12,7 +12,9 @@ interface AuthContextType {
   loading: boolean;
   login: (data: LoginFormData) => Promise<void>;
   logout: () => void;
+  loginGoogle: (idToken: string) => Promise<void>;
 }
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -79,6 +81,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginGoogle = async (idToken: string) => {
+    setLoading(true);
+    try {
+      const result = await loginWithGoogle(idToken);
+      if (result.success) {
+        await fetchUser();
+        if (result.data?.needsAction) {
+          router.push('/complete-profile');
+        }
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      setUser(null);
+    } finally{
+      setLoading(false)
+    }
+  }
+
   const logout = async () => {
     setLoading(true);
     await logoutUser();
@@ -88,7 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, loginGoogle }}>
       {children}
     </AuthContext.Provider>
   );

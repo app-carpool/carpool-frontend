@@ -1,26 +1,51 @@
 import { LoginFormData, RegisterFormData } from "@/types/forms";
-import { LoginResponse, RegisterResponse } from "@/types/response/auth";
+import { GoogleLoginResponse, LoginResponse, RegisterResponse } from "@/types/response/auth";
 
 // src/services/authService.ts
-export const loginUser = async (data: LoginFormData) => {
+export const loginUser = async (data: LoginFormData): Promise<{
+  success: boolean;
+  data?: LoginResponse;
+  error?: string;
+}> => {
   try {
-    const res = await fetch('/api/login', {
+    const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
       credentials: 'include',
     });
-    
+
     const result = await res.json();
-    
+
     if (res.ok && result.success) {
-      return { success: true, ...result };
+      return { success: true, data: result };
     } else {
       return { success: false, error: result.message || 'Login failed' };
     }
-  } catch (error) {
-    console.error('💥 Error in loginUser:', error);
-    return { success: false, error: 'Network error' };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Network error' };
+  }
+};
+
+export const loginWithGoogle = async (idToken: string): Promise<{ success: boolean; data?: GoogleLoginResponse['data']; error?: string }> => {
+ 
+  try {
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ idToken }),
+    });
+
+    const result = await res.json();
+
+    if (res.ok && result.success) {
+      return { success: true, data: result.data };
+    } else {
+      return { success: false, error: result.message || 'Fallo login con Google' };
+    }
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Error de red' };
   }
 };
 
@@ -54,7 +79,7 @@ export async function logoutUser(): Promise<{
   message?: string;
 }> {
   try {
-    const res = await fetch('/api/logout', {
+    const res = await fetch('/api/auth/logout', {
       method: 'POST',
       credentials: 'include',
     });

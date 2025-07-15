@@ -26,6 +26,7 @@ export function RegisterForm() {
   // Form para el paso 1
   const step1Form = useForm<RegisterStep1Data>({
     resolver: zodResolver(registerStep1Schema),
+    mode: 'onChange',
     defaultValues: {
       username: '',
       email: '',
@@ -37,6 +38,7 @@ export function RegisterForm() {
   // Form para el paso 2
   const step2Form = useForm<RegisterStep2Data>({
     resolver: zodResolver(registerStep2Schema),
+    mode: 'onChange',
     defaultValues: {
       name: '',
       lastname: '',

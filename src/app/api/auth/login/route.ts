@@ -4,6 +4,7 @@ import { LoginResponse } from "@/types/response/auth";
 import { parseJwt } from "@/utils/jwt";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+console.log('apiUrl',apiUrl)
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,8 +29,11 @@ export async function POST(req: NextRequest) {
     }
     
     const { accessToken, refreshToken } = data.data;
-    const decoded: { username: string; iat: number; exp: number } = parseJwt(accessToken);
-
+    console.log('AccessToken:', accessToken);
+    const decoded = parseJwt(accessToken);
+    console.log('Decoded token:', decoded);
+    
+    
     const iat = Number(decoded.iat);
     const exp = Number(decoded.exp);
     const maxAge = exp > iat ? exp - iat : 60 * 60 * 2;

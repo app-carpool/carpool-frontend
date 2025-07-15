@@ -12,3 +12,16 @@ export interface RegisterResponse {
   messages: string[];
   state: string;
 }
+
+export interface GoogleLoginResponse {
+  data: {
+    accessToken: string;
+    refreshToken: string | null;
+    email: string;
+    name: string;
+    status: string;
+    needsAction: boolean;
+  };
+  messages: string[];
+  state: string;
+};

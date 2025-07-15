@@ -19,9 +19,9 @@ export default function MobileNavbar() {
   if (loading || !user) return null; // No mostrar si no está logueado o si está cargando
 
   return (
-    <nav className="fixed bottom-0 left-0 z-50 w-full bg-zinc-900 border-t border-zinc-800 md:hidden">
+    <nav className="fixed bottom-0 left-0 z-50 w-full border-t border-gray-4 dark:border-t dark:border-gray-2  md:hidden">
       <ul className="flex justify-around items-center h-14">
-        {navItems.map(({ href, icon: Icon, label }) => {
+        {navItems.map(({ href, icon: Icon }) => {
           const isActive = pathname === href;
 
           return (
@@ -29,11 +29,10 @@ export default function MobileNavbar() {
               <Link
                 href={href}
                 className={`flex flex-col items-center text-sm ${
-                  isActive ? 'text-white' : 'text-gray-400'
+                  isActive ? 'text-white' : 'text-gray-4'
                 }`}
               >
                 <Icon className="h-5 w-5 mb-0.5" />
-                <span className="text-xs">{label}</span>
               </Link>
             </li>
           );

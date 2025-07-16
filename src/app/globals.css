@@ -72,3 +72,7 @@ body {
   --color-info: #DDFBE2;      /* verde muy claro, para fondos informativos suaves */
   --color-accent-soft: #EEB9A4; /* un acento suave, quizás para fondos o toques suaves */
 }
+
+.grecaptcha-badge {
+  visibility: hidden;
+}

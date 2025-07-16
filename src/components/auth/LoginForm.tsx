@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
 import { FcGoogle } from "react-icons/fc"
@@ -23,7 +23,6 @@ export function LoginForm() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -53,8 +52,9 @@ export function LoginForm() {
       await login({ ...data, recaptchaToken: gRecaptchaToken })
 
       router.push('/home') // redireccion después del login
-    } catch (err) {
+    } catch (err:any) {
       setError(err.message || 'Error al iniciar sesión');
+    }
   }
 
   return (

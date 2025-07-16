@@ -29,10 +29,16 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null)
 
   const [usernameAvailable, setUsernameAvailable] = useState<null | boolean>(null);
+  const [emailAvailable, setEmailAvailable] = useState<null | boolean>(null);
+
   const [checkingUsername, setCheckingUsername] = useState(false);
+  const [checkingEmail, setCheckingEmail] = useState(false);
 
   const [usernameMessage, setUsernameMessage] = useState<string | null>(null);
+  const [emailMessage, setEmailMessage] = useState<string | null>(null);
+
   const [usernameMessageType, setUsernameMessageType] = useState<'success' | 'error' | null>(null)
+  const [emailMessageType, setEmailMessageType] = useState<'success' | 'error' | null>(null)
 
   const router = useRouter()
   const { executeRecaptcha } = useGoogleReCaptcha()
@@ -76,7 +82,7 @@ export function RegisterForm() {
         setUsernameMessageType('success');
       } else {
         setUsernameAvailable(false);
-        setUsernameMessage(data.messages?.[0] || 'Nombre de usuario disponible')
+        setUsernameMessage(data.messages?.[0] || 'Nombre de usuario no disponible')
         setUsernameMessageType('error');
       }
     } catch {
@@ -87,12 +93,42 @@ export function RegisterForm() {
     }
   }, 2000), [])
 
+  const validateEmail = useCallback(debounce(async(email:string)=>{ //debounce retrasa la ejecución de una función
+    if (!email) {
+      setEmailAvailable(null);
+      setCheckingEmail(false);
+      return
+    }
+    setCheckingEmail(true);
+    try {
+      const res = await fetch(`${apiUrl}/users/validate-email?email=${email}`);
+      const data = await res.json();
+      if (res.ok && data.state === 'OK') {
+        setEmailAvailable(true); //usuario disponible
+        setEmailMessage(data.messages?.[0] || 'Correo disponible')
+        setEmailMessageType('success');
+      } else {
+        setEmailAvailable(false);
+        setEmailMessage(data.messages?.[0] || 'Correo no disponible')
+        setEmailMessageType('error');
+      }
+    } catch {
+      setEmailAvailable(null)
+      setError('Error verificando el correo')
+    } finally {
+      setCheckingEmail(false)
+    }
+  }, 2000), [])
+
   //observador del input, se activa cuando el value del input cambia
   useEffect(() => {
     const subscription = step1Form.watch((value, { name }) => {
       if (name === "username" && value.username) {
         setUsernameAvailable(null) // resetear mientras escribe
         validateUsername(value.username)
+      }else if(name === "email" && value.email){
+        setEmailAvailable(null) // resetear mientras escribe
+        validateEmail(value.email)
       }
     })
     return () => subscription.unsubscribe()
@@ -150,16 +186,32 @@ export function RegisterForm() {
     }
   }
 
-  const getRightIcon = () => {
-    if (checkingUsername) {
-      return <Spinner size={16} />
-    } 
-    if (usernameAvailable === true) {
-      return <Check className="w-4 h-4 text-success"/>
+  const getRightIcon = (field: 'user' | 'email') => {
+
+    if (field === 'user') {
+      if (checkingUsername) {
+        return <Spinner size={16} />;
+      }
+      if (usernameAvailable === true) {
+        return <Check className="w-4 h-4 text-success" />;
+      }
+      if (usernameAvailable === false) {
+        return <X className="w-4 h-4 text-error" />;
+      }
     }
-    if (usernameAvailable === false){
-      return <X className="w-4 h-4 text-error"/>
+
+    if (field === 'email') {
+      if (checkingEmail) {
+        return <Spinner size={16} />;
+      }
+      if (emailAvailable === true) {
+        return <Check className="w-4 h-4 text-success" />;
+      }
+      if (emailAvailable === false) {
+        return <X className="w-4 h-4 text-error" />;
+      }
     }
+
     return null
   }
 
@@ -188,7 +240,7 @@ export function RegisterForm() {
               type="text"
               {...step1Form.register('username')}
               error={step1Form.formState.errors.username?.message}
-              rightIcon={getRightIcon()}
+              rightIcon={getRightIcon('user')}
               className="font-outfit"
             />
             {usernameMessageType==='success' ? (
@@ -205,8 +257,16 @@ export function RegisterForm() {
               type="email"
               {...step1Form.register('email')}
               error={step1Form.formState.errors.email?.message}
-              
+              rightIcon={getRightIcon('email')}
+              className="font-outfit"
             />
+
+            {emailMessageType==='success' ? (
+              <p className="text-xs font-inter text-success mt-1">{emailMessage}</p>
+            ):(
+              <p className="text-xs font-inter text-error mt-1">{emailMessage}</p>
+            )
+            }
           </div>
 
           <div>

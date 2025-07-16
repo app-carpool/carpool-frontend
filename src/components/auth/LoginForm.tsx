@@ -10,11 +10,14 @@ import { LoginData, loginSchema } from "@/schemas/auth/loginSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "@/contexts/authContext" 
 import Spinner from "../ui/Spinner"
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 
 export function LoginForm() {
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  const { login, loading } = useAuth() ;
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  const { login, loading } = useAuth() 
+  const { executeRecaptcha } = useGoogleReCaptcha()
+
 
   const {
     register,
@@ -32,11 +35,26 @@ export function LoginForm() {
   const onSubmit = async (data: LoginData) => {
     setError(null);
     try {
-      await login(data);
-      router.push('/home'); //redirecciona después del login
+      // Ejecutar reCAPTCHA
+      if (!executeRecaptcha) {
+        setError('reCAPTCHA no está disponible')
+        return
+      }
+
+      //Obtener el token de recaptcha, pasando el action login, para saber que estamos haciendo
+      const gRecaptchaToken = await executeRecaptcha('login')
+      
+      if (!gRecaptchaToken) {
+        setError('Error al validar reCAPTCHA')
+        return
+      }
+      
+      //Crear un nuevo objeto con los datos del login y el captcha, para iniciar sesion
+      await login({ ...data, recaptchaToken: gRecaptchaToken })
+
+      router.push('/home') // redireccion después del login
     } catch (err) {
-      setError('Error al iniciar sesión');
-    }
+      setError(err.message || 'Error al iniciar sesión');
   }
 
   return (

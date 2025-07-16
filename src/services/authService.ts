@@ -2,15 +2,25 @@ import { LoginFormData, RegisterFormData } from "@/types/forms";
 import { LoginResponse, RegisterResponse } from "@/types/response/auth";
 
 // src/services/authService.ts
-export const loginUser = async (data: LoginFormData) => {
+export const loginUser = async (data: LoginFormData & { recaptchaToken?: string }) => {
   try {
+    const { recaptchaToken, ...loginData } = data;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (recaptchaToken) {
+      headers['recaptcha'] = recaptchaToken;
+    }
+
     const res = await fetch('/api/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      headers, //equivalente a headers: headers
+      body: JSON.stringify(loginData),
       credentials: 'include',
     });
-    
+
     const result = await res.json();
     
     if (res.ok && result.success) {
@@ -25,25 +35,36 @@ export const loginUser = async (data: LoginFormData) => {
 };
 
 
-export async function registerUser(data: RegisterFormData): Promise<{
+export async function registerUser(data: RegisterFormData & { recaptchaToken?: string }): Promise<{
     success:boolean;
     data?:RegisterResponse;
     message?: string}
 > {
     try {
-        const res = await fetch('/api/register',{
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data),
-        })
+        const { recaptchaToken, ...registerData } = data;
 
-        if (!res.ok){
-            throw new Error('Datos inválidos')
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+
+        if (recaptchaToken) {
+          headers['recaptcha'] = recaptchaToken;
         }
 
-        const response: RegisterResponse = await res.json();
+        const res = await fetch('/api/register',{
+            method: 'POST',
+            headers,  //equivalente a headers: headers
+            body: JSON.stringify(registerData),
+        })
 
-        return {success: true, data: response}
+
+        const responseBody = await res.json();
+
+        if (!res.ok) {
+          throw new Error(responseBody.message || 'Error desconocido');
+        }
+
+        return { success: true, data: responseBody };
     } catch (err: any) {
         return {success: false, message: err.message}
     }

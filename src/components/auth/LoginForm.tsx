@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
 import { FcGoogle } from "react-icons/fc"
@@ -18,10 +18,12 @@ export function LoginForm() {
   const { login, loading } = useAuth() 
   const { executeRecaptcha } = useGoogleReCaptcha()
 
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -31,7 +33,7 @@ export function LoginForm() {
   })
 
   const onSubmit = async (data: LoginData) => {
-    setError(null)
+    setError(null);
     try {
       // Ejecutar reCAPTCHA
       if (!executeRecaptcha) {
@@ -53,7 +55,6 @@ export function LoginForm() {
       router.push('/home') // redireccion después del login
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión');
-    }
   }
 
   return (

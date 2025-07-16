@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "@/contexts/authContext" 
 import Spinner from "../ui/Spinner"
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
+import { Alert } from "../ui/Alert"
 
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
@@ -63,7 +64,7 @@ export function LoginForm() {
         <h1 className="font-outfit text-lg font-semibold">Inicia sesión en tu cuenta</h1>
         <p className="font-inter font-regular text-sm">Ingresa email y contraseña para iniciar sesión</p>
       </div>
-
+      {error && <Alert message={error} />}
       <div className="flex flex-col">
         <Input
           label="Nombre de usuario"
@@ -116,7 +117,7 @@ export function LoginForm() {
         <a href="/privacy" className="text-dark-2 font-medium ml-1">Política de Privacidad</a>.
       </p>
 
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      
     </form>
   )
 }

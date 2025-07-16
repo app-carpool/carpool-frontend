@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Función para obtener el usuario
   const fetchUser = async () => {
     try {
-      const res = await fetchWithRefresh('/api/me');
+      const res = await fetchWithRefresh('/api/me',);
       const json = await res.json();
 
       if (res.ok && json.user) {

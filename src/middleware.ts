@@ -5,13 +5,14 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Rutas públicas
-  const publicPaths = ['/login', '/register', '/api/auth/login', '/api/refresh', '/complete-profile'];
+  const publicPaths = ['/login', '/register', '/api/login', '/api/refresh', '/complete-profile'];
 
   if (publicPaths.some(path => pathname.startsWith(path))) {
     return NextResponse.next();
   }
 
   const token = req.cookies.get('token')?.value;
+  
 
   // No hay token
   if (!token) {
@@ -62,7 +63,7 @@ export async function middleware(req: NextRequest) {
 
       if (response.ok) {
         const data = await response.json();
-        const newAccessToken = data.data?.accessToken;
+        const newAccessToken = data.accessToken;
 
         if (newAccessToken) {
           const res = NextResponse.next();
@@ -117,9 +118,9 @@ export async function middleware(req: NextRequest) {
   const now = Date.now();
 
   if (tokenValidUntilStr && Number(tokenValidUntilStr) > now) {
-    console.log('Middleware: Validación cacheada, token ya validado recientemente');
     return NextResponse.next();
   }
+  /*
 
   // Si no está cacheado o expiró, hacemos la validación
   try {
@@ -135,7 +136,7 @@ export async function middleware(req: NextRequest) {
       const data = await verifyResponse.json();
 
       if (data.state === 'OK') {
-        console.log('Middleware: Token válido');
+        
 
         const res = NextResponse.next();
 
@@ -151,13 +152,11 @@ export async function middleware(req: NextRequest) {
 
         return res;
       } else {
-        console.log('Middleware: Token inválido', data.messages);
         const url = req.nextUrl.clone();
         url.pathname = '/login';
         return NextResponse.redirect(url);
       }
     } else {
-      console.log('Middleware: Respuesta no OK del backend', verifyResponse.status);
       const url = req.nextUrl.clone();
       url.pathname = '/login';
       return NextResponse.redirect(url);
@@ -167,9 +166,11 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
-  }
+  }*/
+ return NextResponse.next();
 }
+  
 
 export const config = {
-  matcher: ['/home', '/dashboard', '/api/me', '/api/refresh'],
+  matcher: ['/home', '/dashboard'],
 };

@@ -8,7 +8,7 @@ export const loginUser = async (data: LoginFormData): Promise<{
   error?: string;
 }> => {
   try {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -30,7 +30,7 @@ export const loginUser = async (data: LoginFormData): Promise<{
 export const loginWithGoogle = async (idToken: string): Promise<{ success: boolean; data?: GoogleLoginResponse['data']; error?: string }> => {
  
   try {
-    const res = await fetch('/api/auth/google', {
+    const res = await fetch('/api/google', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -48,7 +48,6 @@ export const loginWithGoogle = async (idToken: string): Promise<{ success: boole
     return { success: false, error: error.message || 'Error de red' };
   }
 };
-
 
 export async function registerUser(data: RegisterFormData): Promise<{
     success:boolean;
@@ -79,7 +78,7 @@ export async function logoutUser(): Promise<{
   message?: string;
 }> {
   try {
-    const res = await fetch('/api/auth/logout', {
+    const res = await fetch('/api/logout', {
       method: 'POST',
       credentials: 'include',
     });

@@ -14,8 +14,6 @@ export async function POST(req: NextRequest) {
       }, { status: 401 });
     }
 
-    console.log('[REFRESH] Attempting to refresh token...');
-
     const response = await fetch(`${apiUrl}/auth/refresh`, {
       method: 'POST',
       headers: { 
@@ -70,7 +68,6 @@ export async function POST(req: NextRequest) {
       maxAge,
     });
 
-    console.log('[REFRESH] Token refreshed successfully');
     return res;
 
   } catch (error) {

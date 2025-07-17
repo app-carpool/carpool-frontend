@@ -30,15 +30,19 @@ export function RegisterForm() {
 
   const [usernameAvailable, setUsernameAvailable] = useState<null | boolean>(null);
   const [emailAvailable, setEmailAvailable] = useState<null | boolean>(null);
+  const [dniAvailable, setDniAvailable] = useState<null | boolean>(null);
 
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [checkingDni, setCheckingDni] = useState(false);
 
   const [usernameMessage, setUsernameMessage] = useState<string | null>(null);
   const [emailMessage, setEmailMessage] = useState<string | null>(null);
+  const [dniMessage, setDniMessage] = useState<string | null>(null);
 
   const [usernameMessageType, setUsernameMessageType] = useState<'success' | 'error' | null>(null)
   const [emailMessageType, setEmailMessageType] = useState<'success' | 'error' | null>(null)
+  const [dniMessageType, setDniMessageType] = useState<'success' | 'error' | null>(null)
 
   const router = useRouter()
   const { executeRecaptcha } = useGoogleReCaptcha()
@@ -104,7 +108,7 @@ export function RegisterForm() {
       const res = await fetch(`${apiUrl}/users/validate-email?email=${email}`);
       const data = await res.json();
       if (res.ok && data.state === 'OK') {
-        setEmailAvailable(true); //usuario disponible
+        setEmailAvailable(true); 
         setEmailMessage(data.messages?.[0] || 'Correo disponible')
         setEmailMessageType('success');
       } else {
@@ -120,19 +124,60 @@ export function RegisterForm() {
     }
   }, 2000), [])
 
-  //observador del input, se activa cuando el value del input cambia
+  const validateDni = useCallback(debounce(async(dni:string)=>{ //debounce retrasa la ejecución de una función
+    if (!dni) {
+      setDniAvailable(null);
+      setCheckingDni(false);
+      return
+    }
+    setCheckingDni(true);
+    try {
+      const res = await fetch(`${apiUrl}/users/validate-dni?dni=${dni}`);
+      const data = await res.json();
+      if (res.ok && data.state === 'OK') {
+        setDniAvailable(true); 
+        setDniMessage(data.messages?.[0] || 'DNI disponible')
+        setDniMessageType('success');
+      } else {
+        setDniAvailable(false);
+        setDniMessage(data.messages?.[0] || 'DNI no disponible')
+        setDniMessageType('error');
+      }
+    } catch {
+      setDniAvailable(null)
+      setError('Error verificando el DNI')
+    } finally {
+      setCheckingDni(false)
+    }
+  }, 2000), [])
+
+  //  observador del input, se activa cuando el value del input cambia
+  // Watch para campos de step1Form: username y email
   useEffect(() => {
     const subscription = step1Form.watch((value, { name }) => {
       if (name === "username" && value.username) {
-        setUsernameAvailable(null) // resetear mientras escribe
-        validateUsername(value.username)
-      }else if(name === "email" && value.email){
-        setEmailAvailable(null) // resetear mientras escribe
-        validateEmail(value.email)
+        setUsernameAvailable(null); // resetear mientras escribe
+        validateUsername(value.username);
+      } else if (name === "email" && value.email) {
+        setEmailAvailable(null);
+        validateEmail(value.email);
       }
-    })
-    return () => subscription.unsubscribe()
-  }, [step1Form, validateUsername])
+    });
+
+    return () => subscription.unsubscribe();
+  }, [step1Form, validateUsername, validateEmail]);
+
+  // Watch para campo de step2Form: dni
+  useEffect(() => {
+    const subscription = step2Form.watch((value, { name }) => {
+      if (name === "dni" && value.dni) {
+        setDniAvailable(null);
+        validateDni(value.dni);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [step2Form, validateDni]);
 
   // Maneja el siguiente paso
   const handleNext = async (data: RegisterStep1Data) => {
@@ -186,7 +231,7 @@ export function RegisterForm() {
     }
   }
 
-  const getRightIcon = (field: 'user' | 'email') => {
+  const getRightIcon = (field: 'user' | 'email' | 'dni') => {
 
     if (field === 'user') {
       if (checkingUsername) {
@@ -208,6 +253,18 @@ export function RegisterForm() {
         return <Check className="w-4 h-4 text-success" />;
       }
       if (emailAvailable === false) {
+        return <X className="w-4 h-4 text-error" />;
+      }
+    }
+
+    if (field === 'dni') {
+      if (checkingDni) {
+        return <Spinner size={16} />;
+      }
+      if (dniAvailable === true) {
+        return <Check className="w-4 h-4 text-success" />;
+      }
+      if (dniAvailable === false) {
         return <X className="w-4 h-4 text-error" />;
       }
     }
@@ -343,8 +400,16 @@ export function RegisterForm() {
               type="text"
               {...step2Form.register('dni')}
               error={step2Form.formState.errors.dni?.message}
-              
+              rightIcon={getRightIcon('dni')}
+              className="font-outfit"
             />
+
+            {dniMessageType==='success' ? (
+              <p className="text-xs font-inter text-success mt-1">{dniMessage}</p>
+            ):(
+              <p className="text-xs font-inter text-error mt-1">{dniMessage}</p>
+            )
+            }
           </div>
 
           <div>

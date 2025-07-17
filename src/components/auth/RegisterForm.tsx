@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerUser } from "@/services/authService"
@@ -17,9 +17,10 @@ import {
 } from "@/schemas/auth/registerSchema"
 import Spinner from "../ui/Spinner"
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
-import debounce from "lodash.debounce"
 import { Check, X } from 'lucide-react'
 import { Alert } from "../ui/Alert"
+import { useFieldValidator } from "@/hooks/useFieldValidator";
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL
 
 
@@ -27,23 +28,6 @@ export function RegisterForm() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const [usernameAvailable, setUsernameAvailable] = useState<null | boolean>(null);
-  const [emailAvailable, setEmailAvailable] = useState<null | boolean>(null);
-  const [dniAvailable, setDniAvailable] = useState<null | boolean>(null);
-
-  const [checkingUsername, setCheckingUsername] = useState(false);
-  const [checkingEmail, setCheckingEmail] = useState(false);
-  const [checkingDni, setCheckingDni] = useState(false);
-
-  const [usernameMessage, setUsernameMessage] = useState<string | null>(null);
-  const [emailMessage, setEmailMessage] = useState<string | null>(null);
-  const [dniMessage, setDniMessage] = useState<string | null>(null);
-
-  const [usernameMessageType, setUsernameMessageType] = useState<'success' | 'error' | null>(null)
-  const [emailMessageType, setEmailMessageType] = useState<'success' | 'error' | null>(null)
-  const [dniMessageType, setDniMessageType] = useState<'success' | 'error' | null>(null)
-
   const router = useRouter()
   const { executeRecaptcha } = useGoogleReCaptcha()
 
@@ -68,116 +52,41 @@ export function RegisterForm() {
       phone: ''
     }
   })
-  
 
-  const validateUsername = useCallback(debounce(async(username:string)=>{ //debounce retrasa la ejecución de una función
-    if (!username || username.length<3) {
-      setUsernameAvailable(null);
-      setCheckingUsername(false);
-      return
-    }
-    setCheckingUsername(true);
-    try {
-      const res = await fetch(`${apiUrl}/users/validate-username?username=${username}`);
-      const data = await res.json();
-      if (res.ok && data.state === 'OK') {
-        setUsernameAvailable(true); //usuario disponible
-        setUsernameMessage(data.messages?.[0] || 'Nombre de usuario disponible')
-        setUsernameMessageType('success');
-      } else {
-        setUsernameAvailable(false);
-        setUsernameMessage(data.messages?.[0] || 'Nombre de usuario no disponible')
-        setUsernameMessageType('error');
-      }
-    } catch {
-      setUsernameAvailable(null)
-      setError('Error verificando el nombre de usuario')
-    } finally {
-      setCheckingUsername(false)
-    }
-  }, 2000), [])
-
-  const validateEmail = useCallback(debounce(async(email:string)=>{ //debounce retrasa la ejecución de una función
-    if (!email) {
-      setEmailAvailable(null);
-      setCheckingEmail(false);
-      return
-    }
-    setCheckingEmail(true);
-    try {
-      const res = await fetch(`${apiUrl}/users/validate-email?email=${email}`);
-      const data = await res.json();
-      if (res.ok && data.state === 'OK') {
-        setEmailAvailable(true); 
-        setEmailMessage(data.messages?.[0] || 'Correo disponible')
-        setEmailMessageType('success');
-      } else {
-        setEmailAvailable(false);
-        setEmailMessage(data.messages?.[0] || 'Correo no disponible')
-        setEmailMessageType('error');
-      }
-    } catch {
-      setEmailAvailable(null)
-      setError('Error verificando el correo')
-    } finally {
-      setCheckingEmail(false)
-    }
-  }, 2000), [])
-
-  const validateDni = useCallback(debounce(async(dni:string)=>{ //debounce retrasa la ejecución de una función
-    if (!dni) {
-      setDniAvailable(null);
-      setCheckingDni(false);
-      return
-    }
-    setCheckingDni(true);
-    try {
-      const res = await fetch(`${apiUrl}/users/validate-dni?dni=${dni}`);
-      const data = await res.json();
-      if (res.ok && data.state === 'OK') {
-        setDniAvailable(true); 
-        setDniMessage(data.messages?.[0] || 'DNI disponible')
-        setDniMessageType('success');
-      } else {
-        setDniAvailable(false);
-        setDniMessage(data.messages?.[0] || 'DNI no disponible')
-        setDniMessageType('error');
-      }
-    } catch {
-      setDniAvailable(null)
-      setError('Error verificando el DNI')
-    } finally {
-      setCheckingDni(false)
-    }
-  }, 2000), [])
+  const usernameValidation = useFieldValidator('username');
+  const emailValidation = useFieldValidator('email');
+  const dniValidation = useFieldValidator('dni');
 
   //  observador del input, se activa cuando el value del input cambia
   // Watch para campos de step1Form: username y email
   useEffect(() => {
     const subscription = step1Form.watch((value, { name }) => {
       if (name === "username" && value.username) {
-        setUsernameAvailable(null); // resetear mientras escribe
-        validateUsername(value.username);
+        usernameValidation.validate(value.username);
       } else if (name === "email" && value.email) {
-        setEmailAvailable(null);
-        validateEmail(value.email);
+        emailValidation.validate(value.email);
       }
     });
-
     return () => subscription.unsubscribe();
-  }, [step1Form, validateUsername, validateEmail]);
+  }, [step1Form, usernameValidation, emailValidation]);
 
   // Watch para campo de step2Form: dni
   useEffect(() => {
     const subscription = step2Form.watch((value, { name }) => {
       if (name === "dni" && value.dni) {
-        setDniAvailable(null);
-        validateDni(value.dni);
+        dniValidation.validate(value.dni);
       }
     });
-
     return () => subscription.unsubscribe();
-  }, [step2Form, validateDni]);
+  }, [step2Form, dniValidation]);
+
+  const getRightIcon = (validation: ReturnType<typeof useFieldValidator>) => {
+    if (validation.checking) return <Spinner size={16} />;
+    if (validation.available === true) return <Check className="w-4 h-4 text-success" />;
+    if (validation.available === false) return <X className="w-4 h-4 text-error" />;
+    return null;
+  };
+
 
   // Maneja el siguiente paso
   const handleNext = async (data: RegisterStep1Data) => {
@@ -231,47 +140,6 @@ export function RegisterForm() {
     }
   }
 
-  const getRightIcon = (field: 'user' | 'email' | 'dni') => {
-
-    if (field === 'user') {
-      if (checkingUsername) {
-        return <Spinner size={16} />;
-      }
-      if (usernameAvailable === true) {
-        return <Check className="w-4 h-4 text-success" />;
-      }
-      if (usernameAvailable === false) {
-        return <X className="w-4 h-4 text-error" />;
-      }
-    }
-
-    if (field === 'email') {
-      if (checkingEmail) {
-        return <Spinner size={16} />;
-      }
-      if (emailAvailable === true) {
-        return <Check className="w-4 h-4 text-success" />;
-      }
-      if (emailAvailable === false) {
-        return <X className="w-4 h-4 text-error" />;
-      }
-    }
-
-    if (field === 'dni') {
-      if (checkingDni) {
-        return <Spinner size={16} />;
-      }
-      if (dniAvailable === true) {
-        return <Check className="w-4 h-4 text-success" />;
-      }
-      if (dniAvailable === false) {
-        return <X className="w-4 h-4 text-error" />;
-      }
-    }
-
-    return null
-  }
-
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
       <div className="flex flex-col items-center text-center mb-2">
@@ -297,15 +165,16 @@ export function RegisterForm() {
               type="text"
               {...step1Form.register('username')}
               error={step1Form.formState.errors.username?.message}
-              rightIcon={getRightIcon('user')}
+              rightIcon={getRightIcon(usernameValidation)}
               className="font-outfit"
             />
-            {usernameMessageType==='success' ? (
-              <p className="text-xs font-inter text-success mt-1">{usernameMessage}</p>
-            ):(
-              <p className="text-xs font-inter text-error mt-1">{usernameMessage}</p>
-            )
-            }
+            {usernameValidation.message && (
+              <p className={`text-xs font-inter mt-1 ${
+                usernameValidation.messageType === 'success' ? 'text-success' : 'text-error'
+              }`}>
+                {usernameValidation.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -314,16 +183,17 @@ export function RegisterForm() {
               type="email"
               {...step1Form.register('email')}
               error={step1Form.formState.errors.email?.message}
-              rightIcon={getRightIcon('email')}
+              rightIcon={getRightIcon(emailValidation)}
               className="font-outfit"
             />
 
-            {emailMessageType==='success' ? (
-              <p className="text-xs font-inter text-success mt-1">{emailMessage}</p>
-            ):(
-              <p className="text-xs font-inter text-error mt-1">{emailMessage}</p>
-            )
-            }
+            {emailValidation.message && (
+              <p className={`text-xs font-inter mt-1 ${
+                emailValidation.messageType === 'success' ? 'text-success' : 'text-error'
+              }`}>
+                {emailValidation.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -400,16 +270,17 @@ export function RegisterForm() {
               type="text"
               {...step2Form.register('dni')}
               error={step2Form.formState.errors.dni?.message}
-              rightIcon={getRightIcon('dni')}
+              rightIcon={getRightIcon(dniValidation)}
               className="font-outfit"
             />
 
-            {dniMessageType==='success' ? (
-              <p className="text-xs font-inter text-success mt-1">{dniMessage}</p>
-            ):(
-              <p className="text-xs font-inter text-error mt-1">{dniMessage}</p>
-            )
-            }
+            {dniValidation.message && (
+              <p className={`text-xs font-inter mt-1 ${
+                dniValidation.messageType === 'success' ? 'text-success' : 'text-error'
+              }`}>
+                {dniValidation.message}
+              </p>
+            )}
           </div>
 
           <div>

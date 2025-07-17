@@ -5,15 +5,15 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Rutas públicas
-  const publicPaths = ['/login', '/register', '/api/login', '/api/refresh', '/complete-profile'];
+  const publicPaths = ['/login', '/register', '/api/login', '/api/refresh'];
 
   if (publicPaths.some(path => pathname.startsWith(path))) {
     return NextResponse.next();
   }
 
   const token = req.cookies.get('token')?.value;
+  console.log('cookie',req.cookies)
   
-
   // No hay token
   if (!token) {
     if (pathname.startsWith('/api')) {
@@ -30,7 +30,6 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
   }
-
   // Token expirado
   if (isTokenExpired(token)) {
     const refreshToken = req.cookies.get('refreshToken')?.value;
@@ -120,7 +119,7 @@ export async function middleware(req: NextRequest) {
   if (tokenValidUntilStr && Number(tokenValidUntilStr) > now) {
     return NextResponse.next();
   }
-  /*
+  
 
   // Si no está cacheado o expiró, hacemos la validación
   try {
@@ -166,8 +165,7 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
-  }*/
- return NextResponse.next();
+  }
 }
   
 

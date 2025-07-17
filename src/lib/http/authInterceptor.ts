@@ -67,7 +67,7 @@ export async function fetchWithRefresh(
 
   // Usar el token manager para evitar múltiples refresh
   const refreshSuccess = await tokenManager.refreshToken();
-
+   
   if (!refreshSuccess) {
     console.error('[fetchWithRefresh] No se pudo refrescar el token');
     if (typeof window !== 'undefined') {

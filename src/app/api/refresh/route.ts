@@ -5,6 +5,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export async function POST(req: NextRequest) {
   try {
     const refreshToken = req.cookies.get('refreshToken')?.value;
+    
 
     if (!refreshToken) {
       console.error('[REFRESH] No refresh token found');

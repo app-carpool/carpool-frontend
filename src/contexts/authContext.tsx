@@ -15,7 +15,6 @@ interface AuthContextType {
   loginGoogle: (idToken: string) => Promise<void>;
 }
 
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -31,7 +30,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Función para obtener el usuario
   const fetchUser = async () => {
     try {
-      const res = await fetchWithRefresh('/api/me',);
+      const res = await fetch('/api/me', {
+        method: 'GET',
+        credentials: 'include', 
+      })
       const json = await res.json();
 
       if (res.ok && json.user) {
@@ -85,10 +87,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const result = await loginWithGoogle(idToken);
+      console.log('result',result.data?.status)
       if (result.success) {
         await fetchUser();
-        if (result.data?.needsAction) {
-          router.push('/complete-profile');
+        if (result.data?.status === 'PENDING_PROFILE') {
+          router.push(`/complete-profile?email=${encodeURIComponent(result.data?.email)}`);
+        } else if (result.data?.status === 'ACTIVE') {
+          router.push('/home')
         }
       } else {
         setUser(null);

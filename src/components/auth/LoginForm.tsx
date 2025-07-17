@@ -45,7 +45,6 @@ export function LoginForm() {
       setError(null)
       try {
         await loginGoogle(credentialResponse.credential)
-        router.push('/home') 
       } catch (e) {
         setError('Error al iniciar sesión con Google')
       }

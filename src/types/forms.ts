@@ -13,3 +13,13 @@ export interface RegisterFormData {
   dni: string;
   phone: string;
 }
+
+
+export interface CompleteRegistrationFormData {
+  username: string;
+  password: string;
+  confirmPassword: string;
+  lastname: string;
+  dni: string;
+  phone: string;
+}

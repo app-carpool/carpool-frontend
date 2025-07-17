@@ -25,3 +25,9 @@ export interface GoogleLoginResponse {
   messages: string[];
   state: string;
 };
+
+export interface CompleteRegResponse {
+  data: {};
+  messages: string[];
+  state: string;
+}

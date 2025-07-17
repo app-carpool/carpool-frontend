@@ -15,8 +15,9 @@ export async function POST(req: NextRequest) {
     });
 
     const data: GoogleLoginResponse = await res.json();
+    console.log('data',data)
 
-    if (!res.ok || data.state !== 'OK') {
+    if (!res.ok || data.state !== "OK") {
       return NextResponse.json(
         { success: false, message: data.messages || "Error desde backend" },
         { status: res.status }
@@ -24,17 +25,23 @@ export async function POST(req: NextRequest) {
     }
 
     const { accessToken, refreshToken } = data.data;
+    console.log('data.data', data.data)
+
+    // Caso 1: El usuario necesita completar perfil (no hay token)
+    
+    // Caso 2: Usuario activo, continuar con login
     const decoded = parseJwt(accessToken);
     const iat = Number(decoded.iat);
     const exp = Number(decoded.exp);
     const maxAge = exp > iat ? exp - iat : 60 * 60 * 2;
 
     const response = NextResponse.json({
+      data: data.data,
       success: true,
       user: {
         username: decoded.username,
       },
-      needsAction: data.data?.needsAction || false,
+      needsAction: false,
     });
 
     response.cookies.set("token", accessToken, {

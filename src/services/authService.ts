@@ -1,5 +1,5 @@
-import { LoginFormData, RegisterFormData } from "@/types/forms";
-import { GoogleLoginResponse, LoginResponse, RegisterResponse } from "@/types/response/auth";
+import { CompleteRegistrationFormData, LoginFormData, RegisterFormData } from "@/types/forms";
+import { CompleteRegResponse, GoogleLoginResponse, LoginResponse, RegisterResponse } from "@/types/response/auth";
 
 // src/services/authService.ts
 export const loginUser = async (data: LoginFormData): Promise<{
@@ -38,6 +38,7 @@ export const loginWithGoogle = async (idToken: string): Promise<{ success: boole
     });
 
     const result = await res.json();
+    console.log('result del Service',result)
 
     if (res.ok && result.success) {
       return { success: true, data: result.data };
@@ -50,27 +51,51 @@ export const loginWithGoogle = async (idToken: string): Promise<{ success: boole
 };
 
 export async function registerUser(data: RegisterFormData): Promise<{
-    success:boolean;
-    data?:RegisterResponse;
-    message?: string}
+  success:boolean;
+  data?:RegisterResponse;
+  message?: string}
 > {
-    try {
-        const res = await fetch('/api/register',{
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data),
-        })
+  try {
+    const res = await fetch('/api/register',{
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data),
+    })
 
-        if (!res.ok){
-            throw new Error('Datos inválidos')
-        }
-
-        const response: RegisterResponse = await res.json();
-
-        return {success: true, data: response}
-    } catch (err: any) {
-        return {success: false, message: err.message}
+    if (!res.ok){
+      throw new Error('Datos inválidos')
     }
+
+    const response: RegisterResponse = await res.json();
+
+    return {success: true, data: response}
+  } catch (err: any) {
+    return {success: false, message: err.message}
+  }
+}
+
+export async function completeRegistration(email: string, data: CompleteRegistrationFormData): Promise<{
+  success:boolean;
+  data?:CompleteRegResponse;
+  message?: string}
+> {
+  try {
+    const res = await fetch(`/api/complete-registration?email=${email}`,{
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data),
+    })
+
+    if (!res.ok){
+      throw new Error('Datos inválidos')
+    }
+
+    const response: CompleteRegResponse = await res.json();
+
+    return {success: true, data: response}
+  } catch (err: any) {
+    return {success: false, message: err.message}
+  }
 }
 
 export async function logoutUser(): Promise<{

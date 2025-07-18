@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { registerUser } from "@/services/authService"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
-import { FcGoogle } from "react-icons/fc"
 import { useRouter } from "next/navigation"
 import { 
   registerStep1Schema, 
@@ -16,12 +15,15 @@ import {
   type CompleteRegisterData
 } from "@/schemas/auth/registerSchema"
 import Spinner from "../ui/Spinner"
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
+import { useAuth } from "@/contexts/authContext"
 
 export function RegisterForm() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { authGoogle } = useAuth()
 
   // Form para el paso 1
   const step1Form = useForm<RegisterStep1Data>({
@@ -78,6 +80,24 @@ export function RegisterForm() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const onGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      setError('Error: no se recibió credencial de Google')
+      return
+    }
+
+    setError(null)
+    try {
+      await authGoogle(credentialResponse.credential)
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión con Google')
+    }
+  }
+
+  const onGoogleError = () => {
+    setError('Error en autenticación con Google')
   }
 
   return (
@@ -148,10 +168,16 @@ export function RegisterForm() {
             <div className="flex-1 h-px bg-gray-4/50" />
           </div>
 
-          <Button variant="google" className="flex items-center gap-2 justify-center font-inter">
-            <span className="text-xl"><FcGoogle /></span>
-            Registrarse con Google
-          </Button>
+          
+          <GoogleLogin
+            onSuccess={onGoogleSuccess}
+            onError={onGoogleError}
+            text="signup_with"
+            shape="rectangular"
+            size="large"
+            width="100%"
+          />
+          
 
           <p className="w-full text-center text-sm text-gray-500 font-inter">
             Al hacer clic en continuar, aceptás nuestros

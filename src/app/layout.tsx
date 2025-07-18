@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import localFont from 'next/font/local'
 import { AppProviders } from './providers';
-import MobileNavbar from "@/components/navbar/MobileNavbar";
 import ClientLayout from "@/layout/ClientLayout";
 
 

@@ -3,8 +3,6 @@
 import { useState } from "react"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
-import { FcGoogle } from "react-icons/fc"
-import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { LoginData, loginSchema } from "@/schemas/auth/loginSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -14,8 +12,7 @@ import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
 
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-  const { login, loading, loginGoogle } = useAuth() 
+  const { login, loading, authGoogle } = useAuth()
 
   const {
     register,
@@ -23,7 +20,7 @@ export function LoginForm() {
     formState: { errors },
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
-    mode:'onChange',
+    mode: 'onChange',
     defaultValues: {
       username: '',
       password: ''
@@ -34,20 +31,22 @@ export function LoginForm() {
     setError(null)
     try {
       await login(data)
-      router.push('/home') // redireccioná después del login
-    } catch (err) {
-      setError('Error al iniciar sesión')
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión')
     }
   }
 
   const onGoogleSuccess = async (credentialResponse: CredentialResponse) => {
-    if (credentialResponse.credential) {
-      setError(null)
-      try {
-        await loginGoogle(credentialResponse.credential)
-      } catch (e) {
-        setError('Error al iniciar sesión con Google')
-      }
+    if (!credentialResponse.credential) {
+      setError('Error: no se recibió credencial de Google')
+      return
+    }
+
+    setError(null)
+    try {
+      await authGoogle(credentialResponse.credential)
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión con Google')
     }
   }
 
@@ -89,19 +88,23 @@ export function LoginForm() {
         className="w-full mb-2"
       >
         {loading ? (
-          <span className="flex items-center justify-center"><Spinner size={20} /></span>
-          
+          <span className="flex items-center justify-center gap-2">
+            <Spinner size={20} />
+            Iniciando sesión...
+          </span>
         ) : (
           'Iniciar sesión'
         )}
       </Button>
 
-      <div className="flex items-center gap-2 text-gray-500 ">
+      <div className="flex items-center gap-2 text-gray-500">
         <div className="flex-1 h-px bg-gray-4/50" />
         <span className="text-sm font-inter">o</span>
         <div className="flex-1 h-px bg-gray-4/50" />
       </div>
-
+      
+      
+      
       <GoogleLogin
         onSuccess={onGoogleSuccess}
         onError={onGoogleError}
@@ -110,6 +113,7 @@ export function LoginForm() {
         size="large"
         width="100%"
       />
+     
 
       <p className="w-full text-center text-sm text-gray-4 font-inter">
         Al hacer clic en continuar, aceptás nuestros

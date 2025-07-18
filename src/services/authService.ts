@@ -27,8 +27,7 @@ export const loginUser = async (data: LoginFormData): Promise<{
   }
 };
 
-export const loginWithGoogle = async (idToken: string): Promise<{ success: boolean; data?: GoogleLoginResponse['data']; error?: string }> => {
- 
+export const authWithGoogle = async (idToken: string): Promise<{ success: boolean; data?: GoogleLoginResponse['data']; error?: string }> => {
   try {
     const res = await fetch('/api/google', {
       method: 'POST',

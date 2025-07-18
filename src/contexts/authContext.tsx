@@ -9,7 +9,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (data: LoginFormData) => Promise<void>;
+  login: (data: LoginFormData & { recaptchaToken?: string }) => Promise<void>;
   logout: () => void;
   authGoogle: (idToken: string) => Promise<void>;
   initialized: boolean;
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [isPublicRoute, fetchUser, router]);
 
-  const login = async (data: LoginFormData) => {
+  const login = async (data: LoginFormData & { recaptchaToken?: string }) => {
     setLoading(true);
     try {
       const result = await loginUser(data);

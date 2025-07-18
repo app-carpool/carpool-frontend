@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerUser } from "@/services/authService"
@@ -17,13 +17,28 @@ import {
 import Spinner from "../ui/Spinner"
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
 import { useAuth } from "@/contexts/authContext"
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import debounce from "lodash.debounce"
+import { Check, X } from 'lucide-react'
+import { Alert } from "../ui/Alert"
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL
 
 export function RegisterForm() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const [usernameAvailable, setUsernameAvailable] = useState<null | boolean>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+
+  const [usernameMessage, setUsernameMessage] = useState<string | null>(null);
+  const [usernameMessageType, setUsernameMessageType] = useState<'success' | 'error' | null>(null)
+
   const router = useRouter()
   const { authGoogle } = useAuth()
+  const { executeRecaptcha } = useGoogleReCaptcha()
+
 
   // Form para el paso 1
   const step1Form = useForm<RegisterStep1Data>({
@@ -48,11 +63,55 @@ export function RegisterForm() {
       phone: ''
     }
   })
+  
+
+  const validateUsername = useCallback(debounce(async(username:string)=>{ //debounce retrasa la ejecución de una función
+    if (!username || username.length<3) {
+      setUsernameAvailable(null);
+      setCheckingUsername(false);
+      return
+    }
+    setCheckingUsername(true);
+    try {
+      const res = await fetch(`${apiUrl}/users/validate-username?username=${username}`);
+      const data = await res.json();
+      if (res.ok && data.state === 'OK') {
+        setUsernameAvailable(true); //usuario disponible
+        setUsernameMessage(data.messages?.[0] || 'Nombre de usuario disponible')
+        setUsernameMessageType('success');
+      } else {
+        setUsernameAvailable(false);
+        setUsernameMessage(data.messages?.[0] || 'Nombre de usuario disponible')
+        setUsernameMessageType('error');
+      }
+    } catch {
+      setUsernameAvailable(null)
+      setError('Error verificando el nombre de usuario')
+    } finally {
+      setCheckingUsername(false)
+    }
+  }, 2000), [])
+
+  //observador del input, se activa cuando el value del input cambia
+  useEffect(() => {
+    const subscription = step1Form.watch((value, { name }) => {
+      if (name === "username" && value.username) {
+        setUsernameAvailable(null) // resetear mientras escribe
+        validateUsername(value.username)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [step1Form, validateUsername])
 
   // Maneja el siguiente paso
   const handleNext = async (data: RegisterStep1Data) => {
     setError(null)
     setStep(2)
+  }
+
+  const handlePrev = () => {
+    setError(null)          // limpia errores globales
+    setStep(1)              // vuelve al paso anterior
   }
 
   // Maneja el envío final
@@ -68,7 +127,21 @@ export function RegisterForm() {
         ...data
       }
 
-      const response = await registerUser(completeData)
+      // Ejecutar reCAPTCHA
+      if (!executeRecaptcha) {
+        setError('reCAPTCHA no está disponible')
+        return
+      }
+
+      //Obtener el token de recaptcha, pasando el action signup, para saber que estamos haciendo
+      const gRecaptchaToken = await executeRecaptcha('signup')
+
+      if (!gRecaptchaToken) {
+        setError('Error al validar reCAPTCHA')
+        return
+      }
+
+      const response = await registerUser({...completeData, recaptchaToken: gRecaptchaToken})
       if (!response.success) {
         setError(response.message || "Error al registrar usuario")
         return
@@ -81,6 +154,7 @@ export function RegisterForm() {
       setLoading(false)
     }
   }
+
 
   const onGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {
@@ -98,6 +172,18 @@ export function RegisterForm() {
 
   const onGoogleError = () => {
     setError('Error en autenticación con Google')
+
+  const getRightIcon = () => {
+    if (checkingUsername) {
+      return <Spinner size={16} />
+    } 
+    if (usernameAvailable === true) {
+      return <Check className="w-4 h-4 text-success"/>
+    }
+    if (usernameAvailable === false){
+      return <X className="w-4 h-4 text-error"/>
+    }
+    return null
   }
 
   return (
@@ -118,14 +204,22 @@ export function RegisterForm() {
 
       {step === 1 && (
         <form onSubmit={step1Form.handleSubmit(handleNext)} className="flex flex-col gap-4">
+          {error && <Alert message={error} />}
           <div>
             <Input
               label="Nombre de usuario"
               type="text"
               {...step1Form.register('username')}
               error={step1Form.formState.errors.username?.message}
-              
+              rightIcon={getRightIcon()}
+              className="font-outfit"
             />
+            {usernameMessageType==='success' ? (
+              <p className="text-xs font-inter text-success mt-1">{usernameMessage}</p>
+            ):(
+              <p className="text-xs font-inter text-error mt-1">{usernameMessage}</p>
+            )
+            }
           </div>
 
           <div>
@@ -190,6 +284,7 @@ export function RegisterForm() {
 
       {step === 2 && (
         <form onSubmit={step2Form.handleSubmit(handleSubmit)} className="flex flex-col gap-4">
+          {error && <Alert message={error} />}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Input
@@ -232,7 +327,7 @@ export function RegisterForm() {
           </div>
 
           <div className="flex gap-4">
-            <Button type="button" variant="outline" className="w-full" onClick={() => setStep(1)}>
+            <Button type="button" variant="outline" className="w-full" onClick={handlePrev}>
               Atrás
             </Button>
             <Button 
@@ -250,8 +345,6 @@ export function RegisterForm() {
           </div>
         </form>
       )}
-
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   )
 }

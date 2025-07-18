@@ -1,10 +1,13 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
+
 import { AuthProvider, useAuth } from '@/contexts/authContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { usePathname } from 'next/navigation';
 import Spinner from '@/components/ui/Spinner';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -32,21 +35,26 @@ function GlobalLoadingOverlay() {
   );
 }
 
-const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
 export function AppProviders({ children }: AppProvidersProps) {
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   if (!clientId) {
     console.error('NEXT_PUBLIC_GOOGLE_CLIENT_ID no está configurado');
   }
-
   return (
-    <GoogleOAuthProvider clientId={clientId || ''}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <AuthProvider>
-          <GlobalLoadingOverlay />
-          {children}
-        </AuthProvider>
-      </ThemeProvider>
-    </GoogleOAuthProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <GoogleReCaptchaProvider 
+        reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+        scriptProps={{
+          async: true,
+          defer: true,
+          appendTo: 'body',
+        }}
+      >
+      <AuthProvider>
+        <GlobalLoadingOverlay />
+        {children}
+      </AuthProvider>
+    </GoogleReCaptchaProvider>
+    </ThemeProvider>
   );
 }

@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { registerUser } from "@/services/authService"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
-import { FcGoogle } from "react-icons/fc"
 import { useRouter } from "next/navigation"
 import { 
   registerStep1Schema, 
@@ -16,12 +15,14 @@ import {
   type CompleteRegisterData
 } from "@/schemas/auth/registerSchema"
 import Spinner from "../ui/Spinner"
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
+import { useAuth } from "@/contexts/authContext"
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import debounce from "lodash.debounce"
 import { Check, X } from 'lucide-react'
 import { Alert } from "../ui/Alert"
-const apiUrl = process.env.NEXT_PUBLIC_API_URL
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL
 
 export function RegisterForm() {
   const [step, setStep] = useState(1)
@@ -35,11 +36,14 @@ export function RegisterForm() {
   const [usernameMessageType, setUsernameMessageType] = useState<'success' | 'error' | null>(null)
 
   const router = useRouter()
+  const { authGoogle } = useAuth()
   const { executeRecaptcha } = useGoogleReCaptcha()
+
 
   // Form para el paso 1
   const step1Form = useForm<RegisterStep1Data>({
     resolver: zodResolver(registerStep1Schema),
+    mode: 'onChange',
     defaultValues: {
       username: '',
       email: '',
@@ -51,6 +55,7 @@ export function RegisterForm() {
   // Form para el paso 2
   const step2Form = useForm<RegisterStep2Data>({
     resolver: zodResolver(registerStep2Schema),
+    mode: 'onChange',
     defaultValues: {
       name: '',
       lastname: '',
@@ -150,6 +155,24 @@ export function RegisterForm() {
     }
   }
 
+
+  const onGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      setError('Error: no se recibió credencial de Google')
+      return
+    }
+
+    setError(null)
+    try {
+      await authGoogle(credentialResponse.credential)
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión con Google')
+    }
+  }
+
+  const onGoogleError = () => {
+    setError('Error en autenticación con Google')
+
   const getRightIcon = () => {
     if (checkingUsername) {
       return <Spinner size={16} />
@@ -239,10 +262,16 @@ export function RegisterForm() {
             <div className="flex-1 h-px bg-gray-4/50" />
           </div>
 
-          <Button variant="google" className="flex items-center gap-2 justify-center font-inter">
-            <span className="text-xl"><FcGoogle /></span>
-            Registrarse con Google
-          </Button>
+          
+          <GoogleLogin
+            onSuccess={onGoogleSuccess}
+            onError={onGoogleError}
+            text="signup_with"
+            shape="rectangular"
+            size="large"
+            width="100%"
+          />
+          
 
           <p className="w-full text-center text-sm text-gray-500 font-inter">
             Al hacer clic en continuar, aceptás nuestros

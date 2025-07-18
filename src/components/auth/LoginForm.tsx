@@ -3,22 +3,21 @@
 import { useState } from "react"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
-import { FcGoogle } from "react-icons/fc"
-import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { LoginData, loginSchema } from "@/schemas/auth/loginSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "@/contexts/authContext" 
 import Spinner from "../ui/Spinner"
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 import { Alert } from "../ui/Alert"
+
 
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const { login, loading } = useAuth() 
+  const { login, loading, authGoogle } = useAuth()
   const { executeRecaptcha } = useGoogleReCaptcha()
-
 
   const {
     register,
@@ -26,6 +25,7 @@ export function LoginForm() {
     formState: { errors },
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onChange',
     defaultValues: {
       username: '',
       password: ''
@@ -56,6 +56,24 @@ export function LoginForm() {
     } catch (err:any) {
       setError(err.message || 'Error al iniciar sesión');
     }
+  }
+
+  const onGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      setError('Error: no se recibió credencial de Google')
+      return
+    }
+
+    setError(null)
+    try {
+      await authGoogle(credentialResponse.credential)
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión con Google')
+    }
+  }
+
+  const onGoogleError = () => {
+    setError('Error en autenticación con Google')
   }
 
   return (
@@ -92,29 +110,38 @@ export function LoginForm() {
         className="w-full mb-2"
       >
         {loading ? (
-          <span className="flex items-center justify-center"><Spinner size={20} /></span>
-          
+          <span className="flex items-center justify-center gap-2">
+            <Spinner size={20} />
+            Iniciando sesión...
+          </span>
         ) : (
           'Iniciar sesión'
         )}
       </Button>
 
-      <div className="flex items-center gap-2 text-gray-500 ">
+      <div className="flex items-center gap-2 text-gray-500">
         <div className="flex-1 h-px bg-gray-4/50" />
         <span className="text-sm font-inter">o</span>
         <div className="flex-1 h-px bg-gray-4/50" />
       </div>
+      
+      
+      
+      <GoogleLogin
+        onSuccess={onGoogleSuccess}
+        onError={onGoogleError}
+        text="continue_with"
+        shape="rectangular"
+        size="large"
+        width="100%"
+      />
+     
 
-      <Button variant="google" className="flex items-center gap-2 justify-center font-inter">
-        <span className="text-xl"><FcGoogle /></span>
-        Continuar con Google
-      </Button>
-
-      <p className="w-full text-center text-sm text-gray-500 font-inter">
+      <p className="w-full text-center text-sm text-gray-4 font-inter">
         Al hacer clic en continuar, aceptás nuestros
-        <a href="/terms" className="mx-1 text-dark-2 font-medium">Términos de Servicio</a>
+        <a href="/terms" className="mx-1 text-dark-2 dark:text-gray-1 font-medium">Términos de Servicio</a>
         y
-        <a href="/privacy" className="text-dark-2 font-medium ml-1">Política de Privacidad</a>.
+        <a href="/privacy" className="text-dark-2 dark:text-gray-1 font-medium ml-1">Política de Privacidad</a>.
       </p>
 
       

@@ -13,7 +13,6 @@ class TokenManager {
   async refreshToken(): Promise<boolean> {
     // Si ya hay un refresh en progreso, esperar a que termine
     if (this.isRefreshing && this.refreshPromise) {
-      console.log('[TOKEN] Refresh ya en progreso, esperando...');
       return this.refreshPromise;
     }
 
@@ -31,14 +30,12 @@ class TokenManager {
 
   private async performRefresh(): Promise<boolean> {
     try {
-      console.log('[TOKEN] Iniciando refresh...');
       const refresh = await fetch('/api/refresh', {
         method: 'POST',
         credentials: 'include',
       });
 
       if (refresh.ok) {
-        console.log('[TOKEN] Refresh exitoso');
         return true;
       } else {
         console.error('[TOKEN] Refresh falló:', refresh.status);
@@ -70,7 +67,7 @@ export async function fetchWithRefresh(
 
   // Usar el token manager para evitar múltiples refresh
   const refreshSuccess = await tokenManager.refreshToken();
-
+   
   if (!refreshSuccess) {
     console.error('[fetchWithRefresh] No se pudo refrescar el token');
     if (typeof window !== 'undefined') {

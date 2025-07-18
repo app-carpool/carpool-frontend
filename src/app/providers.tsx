@@ -42,19 +42,21 @@ export function AppProviders({ children }: AppProvidersProps) {
   }
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <GoogleReCaptchaProvider 
-        reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
-        scriptProps={{
-          async: true,
-          defer: true,
-          appendTo: 'body',
-        }}
-      >
-      <AuthProvider>
-        <GlobalLoadingOverlay />
-        {children}
-      </AuthProvider>
-    </GoogleReCaptchaProvider>
+      <GoogleOAuthProvider clientId={clientId || ''}>
+        <GoogleReCaptchaProvider 
+          reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+          scriptProps={{
+            async: true,
+            defer: true,
+            appendTo: 'body',
+          }}
+        >
+          <AuthProvider>
+            <GlobalLoadingOverlay />
+            {children}
+          </AuthProvider>
+        </GoogleReCaptchaProvider>
+      </GoogleOAuthProvider>
     </ThemeProvider>
   );
 }

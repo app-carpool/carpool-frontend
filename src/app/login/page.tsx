@@ -48,8 +48,9 @@ export default function LoginPage() {
             apply.
           </p>
         </div>
+        
       </div>
-
+      
     </div>
   );
 }

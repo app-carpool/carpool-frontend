@@ -8,15 +8,7 @@ import ProtectedPage from '@/components/ProtectedPage';
 
 
 export default function HomePage() {
-  const { user, logout, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner />
-      </div>
-    );
-  }
+  const { user, logout } = useAuth();
 
   return (
     <ProtectedPage>

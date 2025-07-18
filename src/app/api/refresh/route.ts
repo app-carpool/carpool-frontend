@@ -5,6 +5,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export async function POST(req: NextRequest) {
   try {
     const refreshToken = req.cookies.get('refreshToken')?.value;
+    
 
     if (!refreshToken) {
       console.error('[REFRESH] No refresh token found');
@@ -13,8 +14,6 @@ export async function POST(req: NextRequest) {
         message: 'No refresh token found' 
       }, { status: 401 });
     }
-
-    console.log('[REFRESH] Attempting to refresh token...');
 
     const response = await fetch(`${apiUrl}/auth/refresh`, {
       method: 'POST',
@@ -70,7 +69,6 @@ export async function POST(req: NextRequest) {
       maxAge,
     });
 
-    console.log('[REFRESH] Token refreshed successfully');
     return res;
 
   } catch (error) {

@@ -1,8 +1,12 @@
-import { LoginFormData, RegisterFormData } from "@/types/forms";
-import { LoginResponse, RegisterResponse } from "@/types/response/auth";
+import { CompleteRegistrationFormData, LoginFormData, RegisterFormData } from "@/types/forms";
+import { CompleteRegResponse, GoogleLoginResponse, LoginResponse, RegisterResponse } from "@/types/response/auth";
 
 // src/services/authService.ts
-export const loginUser = async (data: LoginFormData & { recaptchaToken?: string }) => {
+export const loginUser = async (data: LoginFormData & { recaptchaToken?: string }): Promise<{
+  success: boolean;
+  data?: LoginResponse;
+  error?: string;
+}> => {
   try {
     const { recaptchaToken, ...loginData } = data;
 
@@ -22,18 +26,63 @@ export const loginUser = async (data: LoginFormData & { recaptchaToken?: string 
     });
 
     const result = await res.json();
-    
+
     if (res.ok && result.success) {
-      return { success: true, ...result };
+      return { success: true, data: result };
     } else {
       return { success: false, error: result.message || 'Login failed' };
     }
-  } catch (error) {
-    console.error('💥 Error in loginUser:', error);
-    return { success: false, error: 'Network error' };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Network error' };
   }
 };
 
+export const authWithGoogle = async (idToken: string): Promise<{ success: boolean; data?: GoogleLoginResponse['data']; error?: string }> => {
+  try {
+    const res = await fetch('/api/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ idToken }),
+    });
+
+    const result = await res.json();
+    console.log('result del Service',result)
+
+    if (res.ok && result.success) {
+      return { success: true, data: result.data };
+    } else {
+      return { success: false, error: result.message || 'Fallo login con Google' };
+    }
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Error de red' };
+  }
+};
+
+
+export async function completeRegistration(email: string, data: CompleteRegistrationFormData): Promise<{
+  success:boolean;
+  data?:CompleteRegResponse;
+  message?: string}
+> {
+  try {
+    const res = await fetch(`/api/complete-registration?email=${email}`,{
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data),
+    })
+
+    if (!res.ok){
+      throw new Error('Datos inválidos')
+      }
+
+    const response: CompleteRegResponse = await res.json();
+
+    return {success: true, data: response}
+  } catch (err: any) {
+    return {success: false, message: err.message}
+  }
+}
 
 export async function registerUser(data: RegisterFormData & { recaptchaToken?: string }): Promise<{
     success:boolean;
@@ -57,7 +106,6 @@ export async function registerUser(data: RegisterFormData & { recaptchaToken?: s
             body: JSON.stringify(registerData),
         })
 
-
         const responseBody = await res.json();
 
         if (!res.ok) {
@@ -67,8 +115,8 @@ export async function registerUser(data: RegisterFormData & { recaptchaToken?: s
         return { success: true, data: responseBody };
     } catch (err: any) {
         return {success: false, message: err.message}
-    }
-}
+   }
+} 
 
 export async function logoutUser(): Promise<{
   success: boolean;

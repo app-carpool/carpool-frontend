@@ -160,20 +160,8 @@ export function RegisterForm() {
 
   const onGoogleError = () => {
     setError('Error en autenticación con Google')
-
-  const getRightIcon = () => {
-    if (checkingUsername) {
-      return <Spinner size={16} />
-    } 
-    if (usernameAvailable === true) {
-      return <Check className="w-4 h-4 text-success"/>
-    }
-    if (usernameAvailable === false){
-      return <X className="w-4 h-4 text-error"/>
-    }
-    return null
   }
-
+  
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
       <div className="flex flex-col items-center text-center mb-2">

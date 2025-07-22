@@ -53,7 +53,7 @@ export function LoginForm() {
       //Crear un nuevo objeto con los datos del login y el captcha, para iniciar sesion
       await login({ ...data, recaptchaToken: gRecaptchaToken })
 
-      router.push('/home') // redireccion después del login
+      
     } catch (err:any) {
       setError(err.message || 'Error al iniciar sesión');
     }

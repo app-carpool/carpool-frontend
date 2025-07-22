@@ -5,7 +5,15 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Rutas públicas que no necesitan autenticación
-  const publicPaths = ['/login', '/register', '/api/login', '/api/register', '/api/google', '/api/refresh', '/complete-profile'];
+  const publicPaths = [
+    '/login', 
+    '/register', 
+    '/api/login', 
+    '/api/register', 
+    '/api/google', 
+    '/api/refresh', 
+    '/complete-profile'
+  ];
   
   if (publicPaths.some(path => pathname.startsWith(path))) {
     return NextResponse.next();

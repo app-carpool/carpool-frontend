@@ -4,19 +4,45 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/authContext';
 import { ProfileHeader } from './ProfileHeader';
 import { RoleSwithcer } from './RoleSwitcher';
-import { RoleView } from './RoleView';
+import { RoleOptions } from '@/components/profile/RoleOptions';
+import { useRouter } from 'next/navigation';
+import { Alert } from '@/components/ui/Alert';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [role, setRole] = useState<'pasajero' | 'chofer'>('pasajero');
+  const router = useRouter();
 
   if (!user) return null;
+
+  const isDriver = user.roles?.includes('driver');
+
+  const handleRegisterAsDriver = () => {
+    router.push('/register-as-driver'); // cambiar ruta
+  };
 
   return (
     <div className="max-w-md mx-auto p-4">
       <ProfileHeader user={user} />
       <RoleSwithcer role={role} onChange={setRole} />
-      <RoleView role={role} />
+
+      {role === 'chofer' && !isDriver ? (
+        <div className="mt-6 space-y-3">
+          <Alert type="info" message="Aún no estás registrado como conductor.">
+            <button
+              onClick={handleRegisterAsDriver}
+              className="mt-2 text-sm text-blue-600 hover:underline cursor-pointer"
+            >
+              Registrarme como conductor
+            </button>
+          </Alert>
+        </div>
+      ) : (
+        <RoleOptions
+          role={role === 'chofer' ? 'driver' : 'passenger'}
+          logout={logout}
+        />
+      )}
     </div>
   );
 }

@@ -35,14 +35,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method: 'GET',
         credentials: 'include',
       });
-      
       if (res.ok) {
         const json = await res.json();
+        console.log('json',json)
         if (json.user) {
           setUser({ 
             username: json.user.username,
-            roles: json.user.roles
-          });
+            roles: json.user.roles,
+           });
           return true;
         }
       }

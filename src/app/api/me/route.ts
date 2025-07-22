@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   try {
     const decoded = parseJwt(token);
     
-    if (!decoded || !decoded.username || !decoded.auhtorities) {
+    if (!decoded || !decoded.username || !decoded.authorities) {
       return NextResponse.json({ user: null }, { status: 401 });
     }
 

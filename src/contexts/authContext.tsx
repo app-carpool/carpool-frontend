@@ -39,7 +39,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.ok) {
         const json = await res.json();
         if (json.user) {
-          setUser({ username: json.user.username });
+          setUser({ 
+            username: json.user.username,
+            roles: json.user.roles
+          });
           return true;
         }
       }

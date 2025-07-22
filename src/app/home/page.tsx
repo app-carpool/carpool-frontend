@@ -1,17 +1,10 @@
-'use client'
-
-import { useAuth } from '@/contexts/authContext'
-import ProtectedPage from '@/components/ProtectedPage';
-
 
 export default function HomePage() {
-  const { user, logout } = useAuth();
+
 
   return (
-    <ProtectedPage>
       <main>
         home
       </main>
-    </ProtectedPage>
   );
 }

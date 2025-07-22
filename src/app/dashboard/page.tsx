@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/authContext'
 import Spinner from '@/components/ui/Spinner';
 import Link from 'next/link';
-import ProtectedPage from '@/components/ProtectedPage';
 
 
 export default function DashboardPage() {
@@ -19,15 +18,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <ProtectedPage>
-      <main className="p-8 flex items-center justify-between">
-        <div className='flex flex-col items-start'>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p>Hola, <strong>{user?.username}</strong>!</p>
-        </div>
-        <Link href="/home" className="text-white">Home</Link>
-        <Button variant="outline" onClick={logout}>Logout</Button>
-      </main>
-    </ProtectedPage>
+    <main className="p-8 flex items-center justify-between">
+      <div className='flex flex-col items-start'>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p>Hola, <strong>{user?.username}</strong>!</p>
+      </div>
+      <Link href="/home" className="text-white">Home</Link>
+      <Button variant="outline" onClick={logout}>Logout</Button>
+    </main>
   );
 }

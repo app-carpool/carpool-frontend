@@ -1,20 +1,22 @@
-'use client'
+'use client';
 
-import { Button } from '@/components/ui/Button'
-import { useAuth } from '@/contexts/authContext'
-import Spinner from '@/components/ui/Spinner';
-import Link from 'next/link';
-import ProtectedPage from '@/components/ProtectedPage';
-
+import { useState } from 'react';
+import { useAuth } from '@/contexts/authContext';
+import { ProfileHeader } from './ProfileHeader';
+import { RoleSwithcer } from './RoleSwitcher';
+import { RoleView } from './RoleView';
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const [role, setRole] = useState<'pasajero' | 'chofer'>('pasajero');
+
+  if (!user) return null;
 
   return (
-    <ProtectedPage>
-      <main>
-        profile
-      </main>
-    </ProtectedPage>
+    <div className="max-w-md mx-auto p-4">
+      <ProfileHeader user={user} />
+      <RoleSwithcer role={role} onChange={setRole} />
+      <RoleView role={role} />
+    </div>
   );
 }

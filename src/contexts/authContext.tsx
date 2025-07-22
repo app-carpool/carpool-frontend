@@ -111,7 +111,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (result.success && result.data) {
         await fetchUser();
-        
         // Redirigir según el estado del usuario
         if (result.data.status === 'PENDING_PROFILE') {
           router.push(`/complete-profile?email=${encodeURIComponent(result.data.email)}`);

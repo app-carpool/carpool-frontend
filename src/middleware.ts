@@ -8,10 +8,13 @@ export async function middleware(req: NextRequest) {
   const publicPaths = [
     '/login', 
     '/register', 
+    '/email-verify',
+    '/email-verified',
     '/api/login', 
     '/api/register', 
     '/api/google', 
     '/api/refresh', 
+    '/api/email-verify',
     '/complete-profile'
   ];
   

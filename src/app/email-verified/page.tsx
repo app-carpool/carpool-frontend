@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Spinner from '@/components/ui/Spinner'
-import { AlertCircle, CheckCircle, Loader2, XCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 
 export default function EmailVerifiedPage() {
   const searchParams = useSearchParams()

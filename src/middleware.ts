@@ -15,6 +15,8 @@ export async function middleware(req: NextRequest) {
     '/api/google', 
     '/api/refresh', 
     '/api/email-verify',
+    '/api/complete-registration',
+    '/api/resend-activation',
     '/complete-profile'
   ];
   

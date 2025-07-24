@@ -29,12 +29,13 @@ export async function POST(req: NextRequest) {
     });
 
     const data: LoginResponse = await res.json();
+    console.log('data',data)
 
     if (!res.ok || data.state !== 'OK') {
       return NextResponse.json(
         {
           success: false,
-          message: data.messages?.[0] || 'Error en login',
+          messages: data.messages || 'Error en login',
         },
         { status: res.status }
       );

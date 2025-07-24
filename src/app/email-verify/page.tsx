@@ -1,6 +1,73 @@
+'use client'
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Mail, CheckCircle, Clock } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function EmailVerifyPage() {
+  const searchParams = useSearchParams();
+  const queryEmail = searchParams.get('email');
+
+   const [email, setEmail] = useState(queryEmail || '');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [resent, setResent] = useState(false); // para saber si ya se reenvio
+
+
+  const resendActivation = async (emailToSend: string) => {
+    if (!emailToSend) return;
+    try {
+      setLoading(true);
+      setError(null);
+      setMessage(null);
+
+      const res = await fetch(`/api/resend-activation?email=${encodeURIComponent(emailToSend)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        setError(result.message || 'Error al reenviar el correo.');
+      } else {
+        setMessage('Correo reenviado correctamente.');
+        setResent(true);
+      }
+    } catch (err) {
+      setError('Error de red al reenviar el correo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (queryEmail && !resent) {
+      resendActivation(queryEmail);
+    }
+  }, [queryEmail, resent]);
+  
+   // Validar email simple
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const obscureEmail = (email: string) => {
+    const [name, domain] = email.split('@');
+    if (name.length <= 2) return `${name[0]}***@${domain}`;
+    return `${name[0]}${'*'.repeat(name.length - 2)}${name[name.length - 1]}@${domain}`;
+  };
+
+
+  const handleManualResend = () => {
+    if (!isValidEmail(email)) {
+      setError('Ingresá un correo electrónico válido.');
+      return;
+    }
+    resendActivation(email);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center py-6 px-8">
       {/* Icono principal con animación sutil */}
@@ -8,37 +75,63 @@ export default function EmailVerifyPage() {
       <div className="w-20 h-20 bg-gray-1/90 rounded-full flex items-center justify-center mb-4">
         <Mail className="w-10 h-10 text-primary" />
       </div>
-        
-     
 
       <h1 className="text-2xl font-semibold mb-2">Verificá tu correo</h1>
       
-      <p className="text-gray-3 mt-4 max-w-md mb-8 font-inter">
-        Te enviamos un correo electrónico con un enlace para verificar tu cuenta.
-        Revisa tu bandeja de entrada y seguí las instrucciones.
-      </p>
+      {queryEmail ? (
+        <p className="text-gray-3 mt-4 max-w-md  font-inter">
+          Te enviamos un correo a: <strong>{obscureEmail(email)}</strong>. Revisa tu bandeja de entrada y seguí las instrucciones.
+        </p>
+      ) : (
+        <p className="text-gray-3 mt-4 max-w-md  font-inter">
+          Ingresá tu correo electrónico para reenviar el enlace de verificación.
+        </p>
+      )}
+
+      {!queryEmail &&(
+        <div className="my-6 flex items-center gap-2">
+          <div>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={error || ''}
+              placeholder="example@gmail.com"
+            />
+          </div>
+          
+          <Button
+            onClick={handleManualResend}
+            disabled={loading}
+            variant="outline"
+            className=""
+          >
+            Reenviar
+          </Button>
+        </div>
+      )}
 
       {/* Instrucciones con iconos */}
-      <div className="space-y-4 max-w-md font-inter">
-        <div className="flex items-center space-x-3 text-sm text-gray-5">
+      <div className="flex flex-col items-start space-y-4 max-w-md font-inter mt-4 px-4">
+        <div className="flex items-start space-x-3 text-sm text-gray-5">
           <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 ">
-            <span className="text-xs font-semibold text-gray-2">1</span>
+            <span className="text-xs font-semibold text-primary">1</span>
           </div>
           <p className="text-left">Abrí tu aplicación de correo electrónico</p>
         </div>
         
-        <div className="flex items-center space-x-3 text-sm text-gray-5">
+        <div className="flex items-start space-x-3 text-sm text-gray-5">
           <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 ">
-            <span className="text-xs font-semibold text-gray-2">2</span>
+            <span className="text-xs font-semibold text-primary">2</span>
           </div>
-          <p className="text-left">Buscá el correo de verificación (revisá spam si no lo encontrás)</p>
+          <p className="text-left">Buscá el correo de verificación (revisá spam si no lo encontras)</p>
         </div>
         
-        <div className="flex items-center space-x-3 text-sm text-gray-5">
+        <div className="flex items-start space-x-3 text-sm text-gray-5">
           <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-semibold text-gray-2">3</span>
+            <span className="text-xs font-semibold text-primary">3</span>
           </div>
-          <p className="text-left">Hacé clic en el enlace de verificación</p>
+          <p className="text-left">Hacé clic en el botón de activación</p>
         </div>
       </div>
 
@@ -48,10 +141,22 @@ export default function EmailVerifyPage() {
         <p>El enlace expira en 48 horas</p>
       </div>
 
-      {/* Enlace para reenviar (opcional) */}
-      <button className="mt-6 text-blue-600 hover:text-blue-700 text-sm font-medium underline">
-        ¿No recibiste el correo? Reenviar
-      </button>
+      {loading && <p className="mt-4 text-primary">Reenviando correo...</p>}
+      {message && <p className="mt-4 text-success">{message}</p>}
+
+      {/* Solo mostrar botón si NO hay email en query */}
+      {queryEmail && (
+        <Button
+          onClick={handleManualResend}
+          disabled={loading}
+          variant="outline"
+          className="mt-6 text-sm"
+        >
+          ¿No recibiste el correo? Reenviar
+        </Button>
+      )}
+
+      
     </div>
   );
 }

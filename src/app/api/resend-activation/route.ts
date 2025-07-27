@@ -4,7 +4,9 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: NextRequest) {
   try {
-    const email = req.nextUrl.searchParams.get("email")
+    const body = await req.json();
+    const email = body.email;
+
 
     if (!email) {
       return new NextResponse(
@@ -13,9 +15,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const response = await fetch(`${apiUrl}/users/resend-activation?email=${encodeURIComponent(email)}`, {
+    const response = await fetch(`${apiUrl}/users/resend-activation`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
     });
 
     const data = await response.json();

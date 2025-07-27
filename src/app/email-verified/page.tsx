@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 
 export default function EmailVerifiedPage() {
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
+  const router = useRouter();
 
   useEffect(() => {
     if (!token) {
@@ -17,8 +18,9 @@ export default function EmailVerifiedPage() {
 
     const verify = async () => {
       try {
-        const res = await fetch(`/api/email-verify?token=${encodeURIComponent(token)}`, {
+        const res = await fetch(`/api/email-verify`, {
           method: 'POST',
+          body: JSON.stringify({token}),
         })
 
         if (res.ok) {
@@ -98,7 +100,9 @@ export default function EmailVerifiedPage() {
       </div>
 
       <div className="space-y-3">
-        <button className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
+        <button 
+          onClick={() => router.push('/login')}
+          className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
           Solicitar nuevo enlace
         </button>
         

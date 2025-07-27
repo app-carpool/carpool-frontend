@@ -4,7 +4,8 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.nextUrl.searchParams.get("token")
+    const body = await req.json();
+    const token= body.token;
 
     if (!token) {
       return new NextResponse(
@@ -13,9 +14,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const response = await fetch(`${apiUrl}/users/activate-account?token=${encodeURIComponent(token)}`, {
+    const response = await fetch(`${apiUrl}/users/activate-account`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({token}),
     });
 
     const data = await response.json();

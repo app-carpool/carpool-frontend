@@ -23,9 +23,10 @@ export default function EmailVerifyPage() {
       setError(null);
       setMessage(null);
 
-      const res = await fetch(`/api/resend-activation?email=${encodeURIComponent(emailToSend)}`, {
+      const res = await fetch(`/api/resend-activation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailToSend }),
       });
 
       const result = await res.json();

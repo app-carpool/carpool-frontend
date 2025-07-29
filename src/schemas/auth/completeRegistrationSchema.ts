@@ -4,6 +4,11 @@ import { z } from 'zod'
 // Esquema para completar el registro
 export const completeRegistrationSchema = z
   .object({
+    name: z
+      .string()
+      .min(2, 'El nombre debe tener al menos 2 caracteres')
+      .max(100, 'El nombre no puede tener más de 100 caracteres')
+      .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'El nombre solo puede contener letras y espacios'),
     username: z
       .string()
       .min(3, 'El nombre de usuario debe tener al menos 3 caracteres')

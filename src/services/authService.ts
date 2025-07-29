@@ -6,6 +6,8 @@ export const loginUser = async (data: LoginFormData & { recaptchaToken?: string 
   success: boolean;
   data?: LoginResponse;
   error?: string;
+  state?: string;
+  messages?: string[];
 }> => {
   try {
     const { recaptchaToken, ...loginData } = data;
@@ -26,11 +28,17 @@ export const loginUser = async (data: LoginFormData & { recaptchaToken?: string 
     });
 
     const result = await res.json();
+    console.log('result',result)
 
     if (res.ok && result.success) {
       return { success: true, data: result };
     } else {
-      return { success: false, error: result.message || 'Login failed' };
+      return { 
+        success: false, 
+        error: result.message || 'Login failed',
+        state: result.state,
+        messages: result.messages,
+      };
     }
   } catch (error: any) {
     return { success: false, error: error.message || 'Network error' };
@@ -66,11 +74,14 @@ export async function completeRegistration(email: string, data: CompleteRegistra
   message?: string}
 > {
   try {
-    const res = await fetch(`/api/complete-registration?email=${email}`,{
+    const body = { ...data, email };
+
+    const res = await fetch(`/api/complete-registration`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data),
-    })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      credentials: 'include', 
+    });
 
     if (!res.ok){
       throw new Error('Datos inválidos')

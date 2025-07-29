@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/authContext';
-import { ProfileHeader } from './ProfileHeader';
-import { RoleSwithcer } from './RoleSwitcher';
+import { ProfileHeader } from '../../components/profile/ProfileHeader';
+import { RoleSwithcer } from '../../components/profile/RoleSwitcher';
 import { RoleOptions } from '@/components/profile/RoleOptions';
 import { useRouter } from 'next/navigation';
 import { Alert } from '@/components/ui/Alert';
@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const isDriver = user.roles?.includes('driver');
 
   const handleRegisterAsDriver = () => {
-    router.push('/register-as-driver'); // cambiar ruta
+    router.push('/register-driver'); // cambiar ruta
   };
 
   return (

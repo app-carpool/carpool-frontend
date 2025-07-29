@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
 
   // Rutas públicas donde no necesitamos autenticación
-  const publicRoutes = ['/login', '/register', '/complete-profile'];
+  const publicRoutes = ['/login', '/register', '/complete-profile', '/email-verify', '/email-verified'];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
   // Función para obtener el usuario actual
@@ -91,6 +91,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const result = await loginUser(data);
+      console.log('result', result)
+
+      const code = result.messages?.[0]; 
+      console.log('data desde login',data)
+
+      if (code === 'PENDING_VERIFICATION') {
+        router.push('/email-verify');
+        return;
+      }
+
       if (result.success) {
         await fetchUser();
         router.push('/home');

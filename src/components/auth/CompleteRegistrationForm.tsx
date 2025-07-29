@@ -32,7 +32,7 @@ export function CompleteRegistrationForm({email}:CompleteRegistrationFormProps) 
     setError(null)
     try {
       await completeRegistration(email,data)
-      router.push('/home')
+      router.push('/email-verify')
     } catch (err) {
       setError('Error al registrar usuario')
     } finally {
@@ -43,14 +43,24 @@ export function CompleteRegistrationForm({email}:CompleteRegistrationFormProps) 
   return (
     <div className="flex flex-col gap-4 w-full">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        
+        {/* Nombre de usuario solo */}
+        <Input
+          label="Nombre de usuario"
+          type="text"
+          {...register("username")}
+          error={errors.username?.message}
+        />
+
+        {/* Nombre y Apellido */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label="Nombre de usuario"
+            label="Nombre"
             type="text"
-            {...register("username")}
-            error={errors.username?.message}
+            {...register("name")}
+            error={errors.name?.message}
           />
-        
+
           <Input
             label="Apellido"
             type="text"
@@ -59,6 +69,7 @@ export function CompleteRegistrationForm({email}:CompleteRegistrationFormProps) 
           />
         </div>
 
+        {/* DNI y Teléfono */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="DNI"
@@ -75,6 +86,7 @@ export function CompleteRegistrationForm({email}:CompleteRegistrationFormProps) 
           />
         </div>
 
+        {/* Contraseña y Confirmar */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Contraseña"
@@ -92,7 +104,7 @@ export function CompleteRegistrationForm({email}:CompleteRegistrationFormProps) 
         </div>
 
         <Button variant="primary" type="submit" className="w-full mt-4" disabled={loading || isSubmitting}>
-          {loading ? <Spinner size={20} /> : "Registarse"}
+          {loading ? <Spinner size={20} /> : "Registrarse"}
         </Button>
 
         {error && <p className="text-red-500 text-sm mt-1">{error}</p>}

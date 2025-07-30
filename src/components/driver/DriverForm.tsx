@@ -4,21 +4,17 @@ import { useState } from "react"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
 import { useForm } from "react-hook-form"
-import { LoginData, loginSchema } from "@/schemas/auth/loginSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "@/contexts/authContext" 
-import Spinner from "../ui/Spinner"
-import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 import { Alert } from "../ui/Alert"
 import { useRouter } from "next/navigation"
 import { DriverData, driverSchema } from "@/schemas/auth/driverSchema"
-
+import { registerDriver } from "@/services/driverService"
 
 export function DriverForm() {
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-  const { executeRecaptcha } = useGoogleReCaptcha()
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const {fetchUser} = useAuth();
 
   const {
     register,
@@ -40,8 +36,14 @@ export function DriverForm() {
   const onSubmit = async (data: DriverData) => {
     setError(null);
     try {
-
-      
+      console.log('data enviada',data)
+      const response = await registerDriver(data)
+      if (!response.success) {
+        setError(response.message || "Error al registrar usuario");
+        return
+      }
+      await fetchUser();
+      router.push('/profile');
     } catch (err:any) {
       setError(err.message || 'Error al crear el perfil de conductor');
     }
@@ -89,7 +91,7 @@ export function DriverForm() {
 
           <Input
             label="Número"
-            type="number"
+            type="text"
             autoComplete="addressNumber"
             {...register('addressNumber')}
             error={errors.addressNumber?.message}
@@ -103,7 +105,6 @@ export function DriverForm() {
             error={errors.locality?.message}
           />
         </div>
-
         <Button
           variant="primary"
           type="submit"

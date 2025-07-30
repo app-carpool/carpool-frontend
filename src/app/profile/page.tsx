@@ -10,11 +10,12 @@ import { Alert } from '@/components/ui/Alert';
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
-  const [role, setRole] = useState<'pasajero' | 'chofer'>('pasajero');
+  const [role, setRole] = useState<'pasajero' | 'conductor'>('pasajero');
   const router = useRouter();
 
   if (!user) return null;
 
+  console.log(user.roles)
   const isDriver = user.roles?.includes('driver');
 
   const handleRegisterAsDriver = () => {
@@ -22,11 +23,11 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4">
+    <div className="max-w-md mx-auto p-4 py-12">
       <ProfileHeader user={user} />
       <RoleSwithcer role={role} onChange={setRole} />
 
-      {role === 'chofer' && !isDriver ? (
+      {role === 'conductor' && !isDriver ? (
         <div className="mt-6 space-y-3">
           <Alert type="info" message="Aún no estás registrado como conductor.">
             <button
@@ -39,7 +40,7 @@ export default function ProfilePage() {
         </div>
       ) : (
         <RoleOptions
-          role={role === 'chofer' ? 'driver' : 'passenger'}
+          role={role === 'conductor' ? 'driver' : 'passenger'}
           logout={logout}
         />
       )}

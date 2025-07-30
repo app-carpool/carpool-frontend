@@ -13,6 +13,7 @@ interface AuthContextType {
   logout: () => void;
   authGoogle: (idToken: string) => Promise<void>;
   initialized: boolean;
+  fetchUser: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -166,6 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     authGoogle,
     initialized,
+    fetchUser,
   };
 
   return (

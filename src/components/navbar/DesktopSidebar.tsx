@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, Bell, User, Infinity } from 'lucide-react';
+import { Home, Search, Bell, User, Infinity, UserCircle, User2, UserCircle2, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/authContext';
 
 const navItems = [
@@ -18,15 +18,12 @@ export default function DesktopSidebar() {
 
   if (!user || loading) return null;
 
-  const allowedPaths = ['/home', '/search', '/notifications', '/profile','/register-driver'];
-  const shouldShowSidebar = allowedPaths.some((path) => pathname.startsWith(path));
-  if (!shouldShowSidebar) return null;
 
   return (
     <aside className="hidden md:flex fixed top-0 left-0 h-screen w-64 bg-background border-r border-gray-200 dark:border-gray-700 flex-col justify-between px-6 py-8 z-50">
       {/* Top section: logo y navegación */}
       <div>
-        <h1 className="text-xl font-semibold mb-10 flex items-center gap-1"><Infinity size={40} />Carpool</h1>
+        <h1 className="text-xl font-semibold mb-10 flex items-center gap-1 justify-center"><Infinity size={40} />Carpool</h1>
         <nav className="flex flex-col gap-2">
           {navItems.map(({ href, icon: Icon, label }) => {
             const isActive = pathname.startsWith(href);
@@ -49,12 +46,13 @@ export default function DesktopSidebar() {
       </div>
 
       {/* Bottom section: usuario y logout */}
-      <div className="text-sm text-gray-600 flex flex-col gap-2">
-        <span className="font-medium">{user.username}</span>
+      <div className="text-sm text-gray-600 flex flex-col gap-1">
+        <span className="font-medium px-4 flex items-center gap-1"><UserCircle2 size={14}/>{user.username}</span>
         <button
           onClick={logout}
-          className="text-red-500 hover:underline font-medium transition-colors text-left"
-        >
+          className="text-red-500 hover:bg-red-100 dark:hover:bg-red-950 px-4 py-2 font-medium transition-colors text-left rounded-md cursor-pointer flex items-center gap-2"
+        > 
+          <LogOut size={14} />
           Cerrar sesión
         </button>
       </div>

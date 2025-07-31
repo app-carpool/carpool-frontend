@@ -1,7 +1,7 @@
 'use client'
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Mail, CheckCircle, Clock } from "lucide-react";
+import { Mail, Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -37,7 +37,7 @@ export default function EmailVerifyPage() {
         setMessage('Correo reenviado correctamente.');
         setResent(true);
       }
-    } catch (err) {
+    } catch {
       setError('Error de red al reenviar el correo.');
     } finally {
       setLoading(false);

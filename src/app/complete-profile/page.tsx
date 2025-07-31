@@ -1,7 +1,7 @@
 'use client'
 
 import { CompleteRegistrationForm } from "@/components/auth/CompleteRegistrationForm";
-import { ArrowLeft, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

@@ -35,7 +35,7 @@ export const loginUser = async (data: LoginFormData & { recaptchaToken?: string 
     } else {
       return { 
         success: false, 
-        error: result.message || 'Login failed',
+        error: result.messages || 'Login failed',
         state: result.state,
         messages: result.messages,
       };

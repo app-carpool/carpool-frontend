@@ -15,9 +15,10 @@ export async function registerDriver( data: DriverData): Promise<{
       body: JSON.stringify(body),
       credentials: 'include', 
     });
-
+    
     if (!res.ok){
-      throw new Error('Datos inválidos')
+      const errorMessage = await res.json();
+      throw new Error(errorMessage.message);
     }
 
     const response: DriverResponse = await res.json();

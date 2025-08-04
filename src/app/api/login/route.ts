@@ -29,7 +29,6 @@ export async function POST(req: NextRequest) {
     });
 
     const data: LoginResponse = await res.json();
-    console.log('data',data)
 
     if (!res.ok || data.state !== 'OK') {
       return NextResponse.json(
@@ -75,9 +74,7 @@ export async function POST(req: NextRequest) {
     });
 
     return response;
-
   } catch (error: any) {
-    console.error('Login error:', error);
     return NextResponse.json(
       {
         success: false,

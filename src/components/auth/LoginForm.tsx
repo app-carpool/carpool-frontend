@@ -55,6 +55,7 @@ export function LoginForm() {
 
       
     } catch (err:any) {
+      console.log(err)
       setError(err.message || 'Error al iniciar sesión');
     }
   }

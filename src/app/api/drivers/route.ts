@@ -17,12 +17,11 @@ export async function POST(req: NextRequest) {
 
     const { state, messages, data} = await response.json();
 
-
     if (!response.ok || state !== 'OK') {
       return NextResponse.json(
         {
           success: false,
-          message: messages?.[0] || 'Error en registrar al conductor',
+          message: messages?.[1] || 'Error en registrar al conductor',
         },
         { status: response.status }
       );

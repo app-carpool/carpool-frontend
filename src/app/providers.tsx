@@ -39,7 +39,6 @@ export function AppProviders({ children }: AppProvidersProps) {
   if (!clientId) {
     console.error('NEXT_PUBLIC_GOOGLE_CLIENT_ID no está configurado');
   }
-  console.log('site key', process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY)
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <GoogleOAuthProvider clientId={clientId || ''}>

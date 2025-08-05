@@ -6,7 +6,7 @@ export async function myVehicles(): Promise<{
   message?: string;
 }> {
   try {
-    const res = await fetch("/api/vehicles", {
+    const res = await fetch("/api/vehicle", {
       method: "GET",
       credentials: "include", // incluye las cookies (donde está el token)
     });
@@ -17,6 +17,7 @@ export async function myVehicles(): Promise<{
     }
 
     const response: VehicleResponse = await res.json();
+
     return { success: true, data: response };
   } catch (error: any) {
     return { success: false, message: error.message || "Network error" };

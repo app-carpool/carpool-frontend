@@ -28,7 +28,6 @@ export const loginUser = async (data: LoginFormData & { recaptchaToken?: string 
     });
 
     const result = await res.json();
-    console.log('result',result)
 
     if (res.ok && result.success) {
       return { success: true, data: result };
@@ -55,7 +54,6 @@ export const authWithGoogle = async (idToken: string): Promise<{ success: boolea
     });
 
     const result = await res.json();
-    console.log('result del Service',result)
 
     if (res.ok && result.success) {
       return { success: true, data: result.data };

@@ -15,7 +15,6 @@ export default function ProfilePage() {
 
   if (!user) return null;
 
-  console.log(user.roles)
   const isDriver = user.roles?.includes('driver');
 
   const handleRegisterAsDriver = () => {

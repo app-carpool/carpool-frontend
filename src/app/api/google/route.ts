@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
     });
 
     const data: GoogleLoginResponse = await res.json();
-    console.log('data',data)
 
     if (!res.ok || data.state !== "OK") {
       return NextResponse.json(
@@ -25,7 +24,6 @@ export async function POST(req: NextRequest) {
     }
 
     const { accessToken, refreshToken } = data.data;
-    console.log('data.data', data.data)
 
     // Caso 1: El usuario necesita completar perfil (no hay token)
     

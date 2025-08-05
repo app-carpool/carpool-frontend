@@ -1,15 +1,17 @@
 "use client";
-import { myVehicles } from "@/services/vehiclesService";
+import { myVehicles } from "@/services/vehicleService";
 import { useEffect, useState } from "react";
+import { VehicleCard } from "./VehicleCard";
 
-export function VehiclesList(){
+export function VehicleList(){
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchVehicles = async () => {
+    const fetchVehicle = async () => {
       const result = await myVehicles();
+
       if (result.success && result.data) {
         setVehicles(result.data.data); // adaptá si el key no es `vehicles`
       } else {
@@ -18,20 +20,17 @@ export function VehiclesList(){
       setLoading(false);
     };
 
-    fetchVehicles();
+    fetchVehicle();
   }, []);
 
   if (loading) return <p>Cargando vehículos...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
   if (vehicles.length === 0) return <p>No tenés vehículos registrados.</p>;
-
-    return (
-        <ul className="space-y-4">
-        {vehicles.map((vehicle, index) => (
-            <li key={index} className="p-4 border rounded shadow">
-            <pre className="text-sm">{JSON.stringify(vehicle, null, 2)}</pre>
-            </li>
-        ))}
-        </ul>
-    );
+  return (
+    <div className="space-y-4">
+      {vehicles.map((vehicle, index) => (
+        <VehicleCard key={index} vehicle={vehicle} />
+      ))}
+    </div>
+  );
 }

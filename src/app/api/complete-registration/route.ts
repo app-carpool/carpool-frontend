@@ -17,7 +17,6 @@ export async function POST(req: NextRequest) {
     }
     
     const token = req.cookies.get('token')?.value;
-    console.log('token',token)
 
     const response = await fetch(`${apiUrl}/users/complete-registration`, {
       method: "POST",

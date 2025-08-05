@@ -24,7 +24,7 @@ export function RoleOptions({ role, logout }: RoleOptionsProps) {
       </Link>
 
       {isDriver && (
-        <Link href="/vehicles" className={linkClasses}>
+        <Link href="/vehicle" className={linkClasses}>
           <span>Vehículos</span>
           <ChevronRight size={18} />
         </Link>

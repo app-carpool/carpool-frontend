@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       if (res.ok) {
         const json = await res.json();
-        console.log('json',json)
+
         if (json.user) {
           setUser({ 
             username: json.user.username,
@@ -92,10 +92,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const result = await loginUser(data);
-      console.log('result', result)
 
       const code = result.messages?.[0]; 
-      console.log('data desde login',data)
 
       if (code === 'PENDING_VERIFICATION') {
         router.push('/email-verify');

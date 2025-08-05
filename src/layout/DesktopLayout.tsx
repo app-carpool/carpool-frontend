@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 export default function DesktopLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const allowedPaths = ['/home', '/search', '/notifications', '/profile', '/register-driver'];
+  const allowedPaths = ['/home', '/search', '/notifications', '/profile', '/register-driver', '/vehicle', '/vehicle/new'];
   const shouldShowSidebar = allowedPaths.some((path) => pathname.startsWith(path));
 
   return (

@@ -29,7 +29,7 @@ export function VehicleActionsModal({ vehicle, isOpen, onClose, onEdit, onDelete
   if (!visible && !isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-90 flex items-end justify-center">
       {/* Fondo gris semi-transparente */}
       <div
         className={`absolute inset-0 bg-black transition-opacity duration-200 ${

@@ -11,7 +11,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className, type, rightIcon, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false)
     const isPassword = type === 'password'
-
+                
     return (
       <div className="flex flex-col relative">
         {label && (
